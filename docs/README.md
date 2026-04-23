@@ -10,6 +10,8 @@ Current core documents:
   Gemini session-control module scope
 - `gemini-image-workflow.md`
   Gemini image workflow scope
+- `gemini-result-export.md`
+  planned Gemini export module scope
 - `modules.md`
   current formal module map
 - `powershell-encoding.md`

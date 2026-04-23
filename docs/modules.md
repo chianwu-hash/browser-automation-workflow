@@ -35,6 +35,23 @@ Purpose:
 - detect generation completion
 - save screenshots and run metadata
 
+### Layer 3: Gemini Result Export
+
+Paths:
+
+- `lib/gemini/result-targeting.js`
+- `lib/gemini/export-routes.js`
+- `lib/gemini/result-export.js`
+- `docs/gemini-result-export.md`
+
+Purpose:
+
+- define the export layer separately from generation
+- target the newest generated result
+- detect available export routes
+- normalize export outcomes and failure states
+- support manual handoff when Gemini export is unstable
+
 ## CLI Entry Point
 
 - `scripts/gemini-image-sequence.js`

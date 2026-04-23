@@ -1,0 +1,16 @@
+node_modules/
+automation-output/
+output/
+tmp/
+*.log
+*.tmp
+*.bak
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.pdf
+*.json
+!package.json
+!package-lock.json
+!.vscode/settings.json

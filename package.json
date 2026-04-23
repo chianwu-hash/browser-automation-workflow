@@ -1,0 +1,14 @@
+{
+  "name": "browser-automation-workflow",
+  "version": "0.1.0",
+  "description": "Reusable browser automation workflows for AI tools, built around logged-in sessions, prompt orchestration, and reliable UI state handling.",
+  "type": "commonjs",
+  "scripts": {
+    "browser:smoke": "node scripts/browser-smoke.js",
+    "browser:session-setup": "node scripts/browser-session-setup.js",
+    "gemini:image-sequence": "node scripts/gemini-image-sequence.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.1"
+  }
+}

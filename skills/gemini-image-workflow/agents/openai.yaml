@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gemini Image Workflow"
+  short_description: "Gemini browser image automation workflow."
+  default_prompt: "Use $gemini-image-workflow to prepare a Gemini image session and run a same-chat prompt sequence."

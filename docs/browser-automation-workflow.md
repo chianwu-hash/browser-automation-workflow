@@ -6,7 +6,7 @@ Many AI tools are easiest to automate after a human has already logged in.
 
 The workflow pattern in this repo is:
 
-1. Open the target site manually in a normal browser profile.
+1. Prepare a logged-in browser session through the separate `cbs-workflows` repo.
 2. Reuse that browser session through CDP.
 3. Detect the correct page and current UI state.
 4. Execute prompts or workflow steps from UTF-8 files.
@@ -19,6 +19,7 @@ The workflow pattern in this repo is:
 
 - Prefer connecting to an existing browser over automating login.
 - Reuse the same profile when the workflow depends on product memory or conversation state.
+- Treat browser profiles and session config files as sensitive local data.
 
 ### 2. Prompt Delivery
 
@@ -46,7 +47,7 @@ The workflow pattern in this repo is:
 
 - Prefer layered selectors over single brittle selectors.
 - Prefer scoped interactions over page-global guesses.
-- If a platform is unstable, separate “generation succeeded” from “download succeeded”.
+- If a platform is unstable, separate "generation succeeded" from "download succeeded".
 
 ## Recommended Output Set
 

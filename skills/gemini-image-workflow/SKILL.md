@@ -9,13 +9,13 @@ Use this skill when the task is to operate Gemini image generation through a rea
 
 ## Quickstart
 
-1. Run `npm run browser:session-setup` in the repo root.
+1. Run `npm run browser:init` from the sibling `cbs-workflows` repo.
 2. Choose the target app and either:
    - enter a remote debugging port, or
    - let the helper choose a free port.
 3. Launch Chrome or Edge with the suggested command.
 4. Log in to Gemini in that browser.
-5. Run `npm run gemini:image-sequence -- --cdp-url <url> --prompt-dir <dir>`.
+5. Run `npm run gemini:image-sequence -- -- --session-file <file> --prompt-dir <dir>` or pass `--cdp-url <url>`.
 
 If you need a brand or character reference image from Drive, add:
 
@@ -27,8 +27,8 @@ If you need a brand or character reference image from Drive, add:
 
 ### 1. Prepare the session
 
-- Use `scripts/browser-session-setup.js` first.
-- Do not assume `9222`; prefer the explicit `--cdp-url` produced by setup.
+- Use `..\cbs-workflows\scripts\browser-session-setup.js` first.
+- Do not assume `9222`; prefer the session file or explicit `--cdp-url` produced by setup.
 - Confirm the operator has logged into Gemini in the browser tied to that port.
 
 ### 2. Open a safe Gemini state

@@ -5,7 +5,7 @@ Use these rules when the Gemini workflow fails.
 ## Missing CDP URL
 
 - Stop immediately.
-- Tell the operator to run `npm run browser:session-setup`.
+- Tell the operator to run `npm run browser:init` from the sibling `cbs-workflows` repo.
 - Do not silently assume port `9222`.
 
 ## No Gemini tab found

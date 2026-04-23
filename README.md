@@ -65,24 +65,26 @@ Run the browser smoke test:
 npm run browser:smoke
 ```
 
-Prepare a logged-in browser session with an app + port prompt:
+Prepare a logged-in browser session in the sibling CBS foundation repo:
 
 ```powershell
-npm run browser:session-setup
+cd ..\cbs-workflows
+npm run browser:init
+cd ..\browser-automation-workflow
 ```
 
 Run the first formal Gemini image workflow module:
 
 ```powershell
-npm run gemini:image-sequence -- --cdp-url http://127.0.0.1:9333 --prompt-dir templates/gemini-sequence
+npm run gemini:image-sequence -- -- --session-file .browser-sessions/gemini-chrome-9333.json --prompt-dir templates/gemini-sequence
 ```
 
 Recommended order:
 
-1. `npm run browser:session-setup`
-2. start Chrome or Edge with the suggested remote debugging port
-3. log in to Gemini in that browser
-4. run `npm run gemini:image-sequence -- --cdp-url ...`
+1. run `npm run browser:init` from `..\cbs-workflows`
+2. log in to Gemini in the browser opened by the initializer
+3. use the generated `.browser-sessions/...json` file
+4. run `npm run gemini:image-sequence -- -- --session-file ..\cbs-workflows\.browser-sessions\...json --prompt-dir templates/gemini-sequence`
 
 ## Design Principles
 
@@ -92,7 +94,16 @@ Recommended order:
 - Treat UI state detection as a first-class concern.
 - Build workflows that degrade gracefully when platform UI changes.
 
-## First Formal Module
+## CBS Foundation
+
+Browser launch, persistent profile setup, remote debugging, manual login readiness, Playwright CDP verification, and reusable session config output now live in the separate foundation repo:
+
+- `..\cbs-workflows`
+- https://github.com/chianwu-hash/cbs-workflows
+
+This repo consumes the session config produced by `cbs-workflows`.
+
+## Gemini Module
 
 This repo now exposes its first formal reusable module:
 
@@ -106,7 +117,7 @@ Together they provide:
 - Gemini image workflow sequencing
 - optional Google Drive reference insertion
 - screenshot and JSON run logging
-- browser session setup guidance for app selection and CDP port choice
+- browser session config reuse through `cbs-workflows`
 
 See:
 

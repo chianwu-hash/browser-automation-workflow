@@ -36,30 +36,40 @@ Those belong to `gemini-image-workflow`.
 - `ensureImageMode(page)`
 - `openGeminiImageChat(cdpUrl)`
 
-## Session Setup Guidance
+## cbs-workflows Dependency
 
-Before a workflow runs, the operator should be able to answer two things:
+Before a Gemini workflow runs, prepare the browser with the separate `cbs-workflows` repo.
 
-1. Which application are we preparing a logged-in session for?
-2. Which remote debugging port should the browser use?
+The initializer answers:
 
-This repo now includes a setup helper:
+- which application is being prepared
+- which browser is used
+- which remote debugging port is active
+- which persistent profile / user data dir stores login state
+- whether Playwright can connect through CDP
 
-- `scripts/browser-session-setup.js`
+Relevant files:
 
-It supports:
-
-- asking the operator which app they want to log into
-- asking for a preferred port
-- picking a free port automatically if the operator does not know which one to use
-- printing the login URL and example Chrome / Edge launch commands
+- `..\cbs-workflows\lib\browser-session-init\index.js`
+- `..\cbs-workflows\scripts\browser-session-setup.js`
+- `..\cbs-workflows\docs\browser-session-init.md`
 
 Recommended flow:
 
-1. Run `npm run browser:session-setup`
-2. Start the browser with the suggested port
-3. Log in to the target app in that browser
-4. Run the actual automation workflow with the resulting CDP URL
+1. From `..\cbs-workflows`, run `npm run browser:init` and choose Gemini, or use `npm run browser:init -- -- --app gemini --yes`
+2. Log in to Gemini in the browser opened by the initializer
+3. Let the initializer write `.browser-sessions/<name>.json`
+4. Run Gemini with either:
+
+```powershell
+npm run gemini:image-sequence -- -- --session-file ..\cbs-workflows\.browser-sessions\gemini-chrome-9333.json --prompt-dir templates/gemini-sequence
+```
+
+or:
+
+```powershell
+npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:9333 --prompt-dir templates/gemini-sequence
+```
 
 ## Design Notes
 

@@ -1,6 +1,25 @@
 # Formal Modules
 
-## First Formal Module
+## Foundation Dependency: cbs-workflows
+
+Browser session initialization now lives in the separate `cbs-workflows` repo:
+
+- local sibling repo: `..\cbs-workflows`
+- remote repo: `https://github.com/chianwu-hash/cbs-workflows`
+
+Purpose:
+
+- choose or receive a remote debugging port
+- find a free port when needed
+- create or reuse a persistent browser profile / user data dir
+- launch Chrome, Edge, or Chromium with remote debugging enabled
+- prompt the operator to log in manually
+- verify Playwright can connect through CDP
+- write a reusable local session config
+
+This repository consumes the generated session config file and uses its `cdpUrl`.
+
+## Gemini Module
 
 This repository now exposes its first formal reusable module around Gemini browser automation.
 
@@ -9,7 +28,6 @@ This repository now exposes its first formal reusable module around Gemini brows
 Path:
 
 - `lib/gemini/session.js`
-- `lib/session-setup.js`
 
 Purpose:
 
@@ -17,7 +35,7 @@ Purpose:
 - normalize page targeting
 - navigate to a fresh chat
 - enter image mode
-- provide a reusable setup helper for app selection and port choice
+- consume a `cdpUrl` produced by `cbs-workflows`
 
 ### Layer 2: Gemini Image Workflow
 
@@ -55,6 +73,5 @@ Purpose:
 ## CLI Entry Point
 
 - `scripts/gemini-image-sequence.js`
-- `scripts/browser-session-setup.js`
 
-Use this when you want a repo-level executable that demonstrates the formal module in action.
+Use this when you want a repo-level executable that demonstrates the Gemini module in action.

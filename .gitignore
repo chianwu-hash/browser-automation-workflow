@@ -2,6 +2,10 @@ node_modules/
 automation-output/
 output/
 tmp/
+.browser-profiles/
+.browser-sessions/
+.env
+.env.*
 *.log
 *.tmp
 *.bak

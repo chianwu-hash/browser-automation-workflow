@@ -16,6 +16,7 @@ function parseArgs(argv) {
     promptFiles: [],
     driveFilename: '',
     driveTab: 'recent',
+    reuseChat: false,
     timeoutMs: 300000,
     screenshotDir: path.resolve(process.cwd(), 'output', 'gemini-sequence'),
     metaPath: path.resolve(process.cwd(), 'output', 'gemini-prompt-sequence.json'),
@@ -39,6 +40,8 @@ function parseArgs(argv) {
       options.cdpUrl = argv[++i];
     } else if (arg === '--session-file' && argv[i + 1]) {
       options.sessionFile = path.resolve(process.cwd(), argv[++i]);
+    } else if (arg === '--reuse-chat') {
+      options.reuseChat = true;
     } else if (arg === '--timeout-ms' && argv[i + 1]) {
       options.timeoutMs = Number(argv[++i]);
     } else if (arg === '--screenshot-dir' && argv[i + 1]) {
@@ -78,7 +81,7 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   assertSetupReady(options);
   const prompts = collectPromptEntries(options);
-  const { browser, page } = await openGeminiImageChat(options.cdpUrl);
+  const { browser, page } = await openGeminiImageChat(options.cdpUrl, { reuseChat: options.reuseChat });
 
   try {
     const results = await runPromptSequence(page, prompts, options);

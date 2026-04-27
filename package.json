@@ -6,6 +6,7 @@
   "scripts": {
     "browser:smoke": "node scripts/browser-smoke.js",
     "browser:session-setup": "node scripts/browser-session-setup.js",
+    "chatgpt:image-batch": "node scripts/chatgpt-image-batch.js",
     "gemini:image-sequence": "node scripts/gemini-image-sequence.js"
   },
   "devDependencies": {

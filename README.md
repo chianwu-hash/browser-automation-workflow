@@ -65,12 +65,10 @@ Run the browser smoke test:
 npm run browser:smoke
 ```
 
-Prepare a logged-in browser session in the sibling CBS foundation repo:
+Prepare a logged-in browser session through the CBS foundation dependency:
 
 ```powershell
-cd ..\cbs-workflows
 npm run browser:init
-cd ..\browser-automation-workflow
 ```
 
 Run the first formal Gemini image workflow module:
@@ -81,10 +79,10 @@ npm run gemini:image-sequence -- -- --session-file .browser-sessions/gemini-chro
 
 Recommended order:
 
-1. run `npm run browser:init` from `..\cbs-workflows`
+1. run `npm run browser:init`
 2. log in to Gemini in the browser opened by the initializer
 3. use the generated `.browser-sessions/...json` file
-4. run `npm run gemini:image-sequence -- -- --session-file ..\cbs-workflows\.browser-sessions\...json --prompt-dir templates/gemini-sequence`
+4. run `npm run gemini:image-sequence -- -- --session-file .browser-sessions\...json --prompt-dir templates/gemini-sequence`
 
 ## Design Principles
 
@@ -96,9 +94,9 @@ Recommended order:
 
 ## CBS Foundation
 
-Browser launch, persistent profile setup, remote debugging, manual login readiness, Playwright CDP verification, and reusable session config output now live in the separate foundation repo:
+Browser launch, persistent profile setup, remote debugging, manual login readiness, Playwright CDP verification, and reusable session config output live in the separate foundation package:
 
-- `..\cbs-workflows`
+- `cbs-workflows`
 - https://github.com/chianwu-hash/cbs-workflows
 
 This repo consumes the session config produced by `cbs-workflows`.

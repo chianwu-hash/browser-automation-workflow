@@ -4,12 +4,15 @@
   "description": "Reusable browser automation workflows for AI tools, built around logged-in sessions, prompt orchestration, and reliable UI state handling.",
   "type": "commonjs",
   "scripts": {
+    "browser:init": "cbs-browser-init",
     "browser:smoke": "node scripts/browser-smoke.js",
-    "browser:session-setup": "node scripts/browser-session-setup.js",
+    "browser:session-setup": "cbs-browser-init",
+    "guided:start": "cbs-guided-start",
     "chatgpt:image-batch": "node scripts/chatgpt-image-batch.js",
     "gemini:image-sequence": "node scripts/gemini-image-sequence.js"
   },
   "devDependencies": {
+    "cbs-workflows": "github:chianwu-hash/cbs-workflows",
     "playwright": "^1.59.1"
   }
 }

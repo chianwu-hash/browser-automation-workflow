@@ -1,7 +1,7 @@
-請在已登入的工作階段中執行這個範例 prompt。
+Create a warm, clean 16:9 presentation visual about a school lunch policy.
 
-這個檔案只是模板，用來提醒：
+Show a calm elementary-school administrative setting with neatly arranged lunch trays, a clipboard, and soft natural light.
 
-- prompt 應以 UTF-8 儲存
-- 長 prompt 應放在檔案裡，不要直接塞進 shell
-- 後續自動化腳本應優先讀取檔案內容
+Keep the layout suitable for slide text overlay.
+
+Do not include readable text, watermarks, logos, or poster lettering inside the image.

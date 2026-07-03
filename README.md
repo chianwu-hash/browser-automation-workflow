@@ -40,7 +40,7 @@ Examples of what should stay in project-specific repos:
 - presentation-specific prompts and assets
 - product-specific output content
 
-## Initial Structure
+## Repository Structure
 
 - `docs/`
   workflow docs, SOPs, and conventions
@@ -58,6 +58,20 @@ Install dependencies:
 ```powershell
 npm install
 ```
+
+Install the bundled Codex skills:
+
+```powershell
+npm run skills:install
+```
+
+If the skills are already installed and you want to update them from this repo, run:
+
+```powershell
+npm run skills:install:force
+```
+
+Restart Codex after installing or updating skills.
 
 Open the shared AI work browser, then confirm the CDP endpoint:
 
@@ -84,6 +98,8 @@ Run ChatGPT image batch generation:
 ```powershell
 npm run chatgpt:image-batch -- -- --cdp-url $env:CDP_URL --prompt-file templates\prompt-example.txt
 ```
+
+The prompt example is intentionally pure prompt text. Keep workflow notes in docs, not inside prompt files that will be sent to AI tools.
 
 Run Gemini image sequencing:
 

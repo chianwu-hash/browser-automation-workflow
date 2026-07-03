@@ -5,6 +5,8 @@
   "type": "commonjs",
   "scripts": {
     "check": "node scripts/check.js",
+    "skills:install": "node scripts/install-skills.js",
+    "skills:install:force": "node scripts/install-skills.js --force",
     "browser:init": "node scripts/browser-session-setup.js",
     "browser:init:legacy": "cbs-browser-init",
     "browser:smoke": "node scripts/browser-smoke.js",

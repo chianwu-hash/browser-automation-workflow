@@ -120,11 +120,13 @@ Paths:
 
 Purpose:
 
-- define the export layer separately from generation
+- define a conservative export-route inspection layer separately from generation
 - target the newest generated result
 - detect available export routes
-- normalize export outcomes and failure states
-- support manual handoff when Gemini export is unstable
+- normalize export-route outcomes and failure states
+- support manual handoff for standalone export attempts
+
+The production `gemini:image-sequence` path already attempts original-size downloads from the current Gemini UI and keeps screenshot fallback evidence.
 
 ## CLI Entry Points
 

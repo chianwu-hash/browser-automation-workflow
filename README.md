@@ -73,6 +73,12 @@ Run the browser smoke test:
 npm run browser:smoke
 ```
 
+Run repository checks:
+
+```powershell
+npm run check
+```
+
 Run ChatGPT image batch generation:
 
 ```powershell
@@ -112,6 +118,7 @@ The older `cbs-workflows` foundation remains supported for repos or machines tha
 
 - `cbs-workflows`
 - https://github.com/chianwu-hash/cbs-workflows
+- `npm run browser:init:legacy`
 
 This repo can consume either an explicit `--cdp-url` or a session config produced by `cbs-workflows`.
 

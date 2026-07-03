@@ -2,9 +2,9 @@
 
 ## Purpose
 
-`gemini-result-export` is the export layer for Gemini image workflows.
+`gemini-result-export` is a conservative helper layer for inspecting export routes on an already-generated Gemini result.
 
-Its job is to take a result that has already been generated in Gemini and turn it into a stable output artifact, while keeping generation success separate from export success.
+The main `gemini:image-sequence` workflow now attempts the current original-size download route directly through `下載原尺寸圖片`, with screenshot fallback when the download event does not fire. This document remains useful for the lower-level route-detection layer and for future standalone export tooling.
 
 ## Why This Is Separate
 
@@ -16,13 +16,13 @@ The current workflow already handles:
 - prompt sequencing
 - generation completion
 
-What remains unstable is export:
+Export can still vary by UI state:
 
 - the available download route varies by account and UI state
 - Gemini may successfully generate an image while failing to export it
-- manual download may still be needed in some runs
+- manual download may still be needed in unusual runs
 
-Because of that, export should not be mixed into the main generation pipeline.
+Because of that, route detection stays separate from generation logic.
 
 ## Current V1 Responsibilities
 
@@ -42,26 +42,37 @@ Probe the available route for the current Gemini UI state, such as:
 
 ### 3. Export Classification
 
-V1 does not claim stable automatic download.
+V1 does not perform the download itself.
 
 Instead it:
 
 - detects the most plausible export route
 - records the route in metadata
-- returns `manual_required` when Gemini export still needs a human
+- returns `manual_required` when a standalone export attempt still needs a human
 
 ### 4. Artifact Logging
 
 - saves a screenshot of the current result state
 - writes normalized export metadata when used by a higher-level workflow
 
+## Relationship To `gemini:image-sequence`
+
+`gemini:image-sequence` is the production path for prompt sequencing and result saving. It already:
+
+- enters image mode
+- sends prompts
+- waits for generation
+- downloads original-size generated images when the current route is visible
+- saves a screenshot fallback when download fails
+
+`gemini-result-export` should not duplicate that flow unless it becomes a standalone CLI for exporting a result that is already open in Gemini.
+
 ## Planned Next Step
 
-Later versions may add:
+Later versions may either:
 
-- route-specific download attempts
-- browser download-event waiting
-- alternative route retries
+- stay as a conservative route-inspection helper, or
+- become a standalone export command with route-specific download attempts and browser download-event waiting
 
 ## Non-goals
 
@@ -125,4 +136,4 @@ V1 is intentionally conservative:
 2. Detect the major export routes.
 3. Save a screenshot artifact.
 4. Return `manual_required` or `failed`.
-5. Do not pretend unstable platform export has been solved.
+5. Do not duplicate the production download path in `gemini:image-sequence`.

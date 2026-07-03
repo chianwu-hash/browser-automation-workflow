@@ -73,13 +73,13 @@ Legacy session-file flow:
 4. Run Gemini with either:
 
 ```powershell
-npm run gemini:image-sequence -- -- --session-file ..\cbs-workflows\.browser-sessions\gemini-chrome-9333.json --prompt-dir templates/gemini-sequence
+npm run gemini:image-sequence -- -- --session-file ..\cbs-workflows\.browser-sessions\<name>.json --prompt-dir templates\gemini-sequence
 ```
 
 or:
 
 ```powershell
-npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:9333 --prompt-dir templates/gemini-sequence
+npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:<legacy-port> --prompt-dir templates\gemini-sequence
 ```
 
 ## Design Notes

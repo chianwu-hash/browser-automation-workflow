@@ -1,0 +1,4 @@
+interface:
+  display_name: "ChatGPT Image Batch"
+  short_description: "Run ChatGPT web image batches"
+  default_prompt: "Use $chatgpt-image-batch to run a ChatGPT image batch from UTF-8 prompt files."

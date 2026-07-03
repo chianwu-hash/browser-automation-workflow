@@ -130,6 +130,7 @@ This repo can consume either an explicit `--cdp-url` or a session config produce
 - `lib/chatgpt/image-batch.js`
 - `scripts/chatgpt-image-batch.js`
 - `scripts/chatgpt-image-multi-mvp.js`
+- `skills/chatgpt-image-batch/SKILL.md`
 
 Together they provide:
 

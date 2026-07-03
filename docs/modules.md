@@ -51,6 +51,7 @@ Paths:
 
 - `lib/chatgpt/image-batch.js`
 - `lib/chatgpt/index.js`
+- `skills/chatgpt-image-batch/SKILL.md`
 
 Purpose:
 

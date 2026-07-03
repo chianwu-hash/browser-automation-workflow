@@ -1,4 +1,4 @@
 interface:
   display_name: "Gemini Image Workflow"
-  short_description: "Gemini browser image automation workflow."
-  default_prompt: "Use $gemini-image-workflow to prepare a Gemini image session and run a same-chat prompt sequence."
+  short_description: "用 Gemini 連續產生圖片"
+  default_prompt: "請幫我用 Gemini 依照提示詞連續產生圖片，需要時沿用同一個對話來維持風格一致。"

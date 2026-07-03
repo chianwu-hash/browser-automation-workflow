@@ -9,13 +9,12 @@ Use this skill when the task is to operate Gemini image generation through a rea
 
 ## Quickstart
 
-1. Run `npm run browser:init` from the sibling `cbs-workflows` repo.
-2. Choose the target app and either:
-   - enter a remote debugging port, or
-   - let the helper choose a free port.
-3. Launch Chrome or Edge with the suggested command.
-4. Log in to Gemini in that browser.
-5. Run `npm run gemini:image-sequence -- -- --session-file <file> --prompt-dir <dir>` or pass `--cdp-url <url>`.
+1. Run `cdp-launch chatgpt` to open the shared AI work browser.
+2. Confirm the endpoint with `cdp-status`.
+3. Log in to Gemini in that browser if needed.
+4. Run `npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:9222 --prompt-dir <dir>`.
+
+The older `cbs-workflows` session-file route remains supported when a project or machine still uses generated browser session configs.
 
 If you need a brand or character reference image from Drive, add:
 
@@ -27,8 +26,8 @@ If you need a brand or character reference image from Drive, add:
 
 ### 1. Prepare the session
 
-- Use `..\cbs-workflows\scripts\browser-session-setup.js` first.
-- Do not assume `9222`; prefer the session file or explicit `--cdp-url` produced by setup.
+- Use the shared local CDP launcher first unless the project documents a different browser setup.
+- Prefer an explicit `--cdp-url`, normally `http://127.0.0.1:9222` on this machine.
 - Confirm the operator has logged into Gemini in the browser tied to that port.
 
 ### 2. Open a safe Gemini state
@@ -63,12 +62,13 @@ This skill is for:
 - same-chat multi-image workflows
 - Drive reference insertion
 - evidence logging
+- original-size generated-image download when the current Gemini UI exposes it
+- screenshot fallback when download is unavailable
 
 This skill is not for:
 
 - automating Gemini login
 - final slide composition
-- reliable generated-image download
 
 Treat image generation success and image download success as separate states.
 

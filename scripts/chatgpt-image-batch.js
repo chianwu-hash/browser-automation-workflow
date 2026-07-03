@@ -89,8 +89,8 @@ function assertSetupReady(options) {
     throw new Error(
       [
         'Missing required --cdp-url <url>.',
-        'Run browser-session-init from the sibling cbs-workflows repo first.',
-        'Then pass either --session-file <file> or --cdp-url http://127.0.0.1:<port>.',
+        'Run `cdp-launch chatgpt` first, confirm the endpoint with `cdp-status`, and log in to ChatGPT in that browser.',
+        'Then pass either --cdp-url http://127.0.0.1:9222 or a legacy --session-file <file>.',
       ].join(' ')
     );
   }

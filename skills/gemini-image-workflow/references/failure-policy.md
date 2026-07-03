@@ -5,8 +5,9 @@ Use these rules when the Gemini workflow fails.
 ## Missing CDP URL
 
 - Stop immediately.
-- Tell the operator to run `npm run browser:init` from the sibling `cbs-workflows` repo.
-- Do not silently assume port `9222`.
+- Tell the operator to run `cdp-launch chatgpt`, confirm with `cdp-status`, and pass `--cdp-url http://127.0.0.1:9222`.
+- If the project uses legacy session files, ask for `--session-file <file>` instead.
+- Do not silently assume the browser is already running.
 
 ## No Gemini tab found
 

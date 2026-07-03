@@ -59,30 +59,38 @@ Install dependencies:
 npm install
 ```
 
+Open the shared AI work browser, then confirm the CDP endpoint:
+
+```powershell
+cdp-launch chatgpt
+cdp-status
+$env:CDP_URL = "http://127.0.0.1:9222"
+```
+
 Run the browser smoke test:
 
 ```powershell
 npm run browser:smoke
 ```
 
-Prepare a logged-in browser session through the CBS foundation dependency:
+Run ChatGPT image batch generation:
 
 ```powershell
-npm run browser:init
+npm run chatgpt:image-batch -- -- --cdp-url $env:CDP_URL --prompt-file templates\prompt-example.txt
 ```
 
-Run the first formal Gemini image workflow module:
+Run Gemini image sequencing:
 
 ```powershell
-npm run gemini:image-sequence -- -- --session-file .browser-sessions/gemini-chrome-9333.json --prompt-dir templates/gemini-sequence
+npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir templates\gemini-sequence
 ```
 
 Recommended order:
 
-1. run `npm run browser:init`
-2. log in to Gemini in the browser opened by the initializer
-3. use the generated `.browser-sessions/...json` file
-4. run `npm run gemini:image-sequence -- -- --session-file .browser-sessions\...json --prompt-dir templates/gemini-sequence`
+1. run `cdp-launch chatgpt`
+2. log in to the sites needed by the workflow, such as ChatGPT and Gemini
+3. confirm the endpoint with `cdp-status`
+4. pass `--cdp-url $env:CDP_URL` to the workflow command
 
 ## Design Principles
 
@@ -92,18 +100,43 @@ Recommended order:
 - Treat UI state detection as a first-class concern.
 - Build workflows that degrade gracefully when platform UI changes.
 
-## CBS Foundation
+## Browser Foundation
 
-Browser launch, persistent profile setup, remote debugging, manual login readiness, Playwright CDP verification, and reusable session config output live in the separate foundation package:
+On this machine, prefer the shared local CDP tools:
+
+- `cdp-launch chatgpt`
+- `cdp-status`
+- default `CDP_URL=http://127.0.0.1:9222`
+
+The older `cbs-workflows` foundation remains supported for repos or machines that still use generated session files:
 
 - `cbs-workflows`
 - https://github.com/chianwu-hash/cbs-workflows
 
-This repo consumes the session config produced by `cbs-workflows`.
+This repo can consume either an explicit `--cdp-url` or a session config produced by `cbs-workflows`.
 
-## Gemini Module
+## Formal Modules
 
-This repo now exposes its first formal reusable module:
+### ChatGPT Image Batch
+
+- `lib/chatgpt/session.js`
+- `lib/chatgpt/image-batch.js`
+- `scripts/chatgpt-image-batch.js`
+- `scripts/chatgpt-image-multi-mvp.js`
+
+Together they provide:
+
+- ChatGPT session control
+- image mode handling for the current web UI
+- one-image-per-prompt batch generation
+- single-response multi-image probing
+- generated image DOM download and run metadata
+
+See:
+
+- [docs/chatgpt-image-batch.md](docs/chatgpt-image-batch.md)
+
+### Gemini Image Workflow
 
 - `lib/gemini/session.js`
 - `lib/gemini/drive-picker.js`
@@ -114,8 +147,8 @@ Together they provide:
 - Gemini session control
 - Gemini image workflow sequencing
 - optional Google Drive reference insertion
-- screenshot and JSON run logging
-- browser session config reuse through `cbs-workflows`
+- original-size image download with screenshot fallback
+- JSON run logging
 
 See:
 

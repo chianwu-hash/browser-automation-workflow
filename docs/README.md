@@ -6,6 +6,8 @@ Current core documents:
 
 - `browser-automation-workflow.md`
   workflow foundations
+- `chatgpt-image-batch.md`
+  ChatGPT image batch and multi-image probe workflow
 - `gemini-session.md`
   Gemini session-control module scope
 - `gemini-image-workflow.md`

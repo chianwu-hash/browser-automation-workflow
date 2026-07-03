@@ -70,8 +70,8 @@ function assertSetupReady(options) {
   throw new Error(
     [
       'Missing required --cdp-url <url>.',
-      'Run `npm run browser:init` from the sibling `cbs-workflows` repo first to launch a logged-in browser session.',
-      'Then pass either `--session-file .browser-sessions/<file>.json` or `--cdp-url http://127.0.0.1:<port>`.',
+      'Run `cdp-launch chatgpt` first, confirm the endpoint with `cdp-status`, and log in to Gemini in that browser.',
+      'Then pass either `--cdp-url http://127.0.0.1:9222` or a legacy `--session-file .browser-sessions/<file>.json`.',
       'With npm 11 on Windows, use `npm run gemini:image-sequence -- -- --session-file ...`.',
     ].join(' ')
   );

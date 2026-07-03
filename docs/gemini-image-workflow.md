@@ -39,12 +39,13 @@ The current reusable Drive behavior includes:
 
 ## Current Boundaries
 
-This first formal module does **not** yet solve every Gemini export problem.
+This module now attempts the current Gemini original-size download route, while still treating export as a separate state from generation.
 
 In particular:
 
-- generated image download remains platform-dependent and unstable
-- result export should be treated as a separate concern from generation success
+- generated image download currently works through the `下載原尺寸圖片` button when it is visible
+- screenshot fallback remains available when the download event does not fire
+- result export should still be treated as a separate concern from generation success
 
 That separation is intentional because Gemini can succeed at generation while failing at download.
 

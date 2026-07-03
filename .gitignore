@@ -1,6 +1,7 @@
 node_modules/
 automation-output/
 output/
+scratch/
 tmp/
 .browser-profiles/
 .browser-sessions/

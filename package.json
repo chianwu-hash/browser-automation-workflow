@@ -9,6 +9,7 @@
     "browser:session-setup": "cbs-browser-init",
     "guided:start": "cbs-guided-start",
     "chatgpt:image-batch": "node scripts/chatgpt-image-batch.js",
+    "chatgpt:image-multi-mvp": "node scripts/chatgpt-image-multi-mvp.js",
     "gemini:image-sequence": "node scripts/gemini-image-sequence.js"
   },
   "devDependencies": {

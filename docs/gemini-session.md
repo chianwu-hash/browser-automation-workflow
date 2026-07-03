@@ -36,9 +36,20 @@ Those belong to `gemini-image-workflow`.
 - `ensureImageMode(page)`
 - `openGeminiImageChat(cdpUrl)`
 
-## cbs-workflows Dependency
+## Browser Session Setup
 
-Before a Gemini workflow runs, prepare the browser with the separate `cbs-workflows` repo.
+Before a Gemini workflow runs, prepare a browser that is already logged in and reachable through CDP.
+
+On this machine, prefer the shared local CDP launcher:
+
+```powershell
+cdp-launch chatgpt
+cdp-status
+$env:CDP_URL = "http://127.0.0.1:9222"
+npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir templates\gemini-sequence
+```
+
+The older `cbs-workflows` initializer remains supported for machines or repos that still use generated session files.
 
 The initializer answers:
 
@@ -54,7 +65,7 @@ Relevant files:
 - `..\cbs-workflows\scripts\browser-session-setup.js`
 - `..\cbs-workflows\docs\browser-session-init.md`
 
-Recommended flow:
+Legacy session-file flow:
 
 1. From `..\cbs-workflows`, run `npm run browser:init` and choose Gemini, or use `npm run browser:init -- -- --app gemini --yes`
 2. Log in to Gemini in the browser opened by the initializer

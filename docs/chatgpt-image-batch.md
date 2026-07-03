@@ -15,18 +15,19 @@ This preserves visual continuity while avoiding long waits for images that may n
 
 ## Usage
 
-Prepare a logged-in ChatGPT browser session from `cbs-workflows`:
+Prepare a logged-in AI work browser:
 
 ```powershell
-cd ..\cbs-workflows
-npm run browser:init -- -- --app chatgpt --browser chrome --port 9333 --yes --no-wait
+cdp-launch chatgpt
+cdp-status
+$env:CDP_URL = "http://127.0.0.1:9222"
 ```
 
 Run one image per UTF-8 prompt file from a directory:
 
 ```powershell
 cd ..\browser-automation-workflow
-npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9333 --prompt-dir C:\path\to\prompts --output-dir C:\path\to\outputs --output-prefix slide --meta C:\path\to\outputs\run-meta.json
+npm run chatgpt:image-batch -- -- --cdp-url $env:CDP_URL --prompt-dir C:\path\to\prompts --output-dir C:\path\to\outputs --output-prefix slide --meta C:\path\to\outputs\run-meta.json
 ```
 
 Prompt files are sorted by filename, so use prefixes such as `01-cover.txt`, `02-context.txt`, and so on. For Windows and Chinese prompts, prefer `--prompt-dir` or `--prompt-file` over `--prompt-text` so PowerShell does not corrupt non-ASCII text.
@@ -34,13 +35,13 @@ Prompt files are sorted by filename, so use prefixes such as `01-cover.txt`, `02
 You can still generate multiple same-brief variants from one prompt file:
 
 ```powershell
-npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9333 --prompt-file C:\path\to\prompt.txt --count 4 --output-dir C:\path\to\outputs --output-prefix variant --meta C:\path\to\outputs\run-meta.json
+npm run chatgpt:image-batch -- -- --cdp-url $env:CDP_URL --prompt-file C:\path\to\prompt.txt --count 4 --output-dir C:\path\to\outputs --output-prefix variant --meta C:\path\to\outputs\run-meta.json
 ```
 
 For a single-response multi-image MVP test, use the dedicated probe:
 
 ```powershell
-npm run chatgpt:image-multi-mvp -- --cdp-url http://127.0.0.1:9333 --prompt-file C:\path\to\prompt.txt --expected-images 3 --output-dir C:\path\to\outputs --output-prefix images2-mvp --meta C:\path\to\outputs\run-meta.json
+npm run chatgpt:image-multi-mvp -- -- --cdp-url $env:CDP_URL --prompt-file C:\path\to\prompt.txt --expected-images 3 --output-dir C:\path\to\outputs --output-prefix images2-mvp --meta C:\path\to\outputs\run-meta.json
 ```
 
 This script sends one prompt and waits for multiple generated image nodes from that one assistant response. It is for probing ChatGPT web behavior, not for ordered production slide generation.

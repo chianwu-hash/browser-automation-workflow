@@ -8,6 +8,7 @@ Each workflow run should leave enough evidence to debug the run without relying 
 - one or more screenshots
 - the prompt file paths used for the run
 - the Gemini page URL used for the run
+- downloaded image paths or fallback screenshot paths
 
 ## Sequence runs
 
@@ -31,7 +32,7 @@ Each `results[]` item should include:
 - `baselineCount`
 - `imageCount`
 - `newImages`
-- `screenshotPath`
+- `outputPath`
 - `completedAt`
 
 ## Validation rule
@@ -39,5 +40,5 @@ Each `results[]` item should include:
 Do not claim success from console text alone. Validate from:
 
 - visible Gemini state
-- saved screenshot artifacts
+- saved output artifacts
 - machine-readable JSON metadata

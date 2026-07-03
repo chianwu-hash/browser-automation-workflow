@@ -47,3 +47,22 @@ In particular:
 - result export should be treated as a separate concern from generation success
 
 That separation is intentional because Gemini can succeed at generation while failing at download.
+
+## UI Drift Notes
+
+### 2026-07-03
+
+The current Gemini web UI in Traditional Chinese uses these image-generation anchors:
+
+- the prompt editor is a Quill-style `role="textbox"` editor with aria label `請輸入 Gemini 提示詞`
+- the tools menu button is labeled `上傳與工具`
+- image mode is selected from `建立圖像`
+- after image mode is enabled, the selected chip is `圖片` with aria label `取消選取「圖片」`
+- generated images render as loaded blob images such as `img.image.loaded` / `img[src^="blob:"]`
+- the original image download button is labeled `下載原尺寸圖片`
+
+Smoke validation after the selector update:
+
+- 3 consecutive one-prompt runs succeeded
+- all 3 runs produced one new image
+- all 3 runs downloaded an original-size JPEG instead of using screenshot fallback

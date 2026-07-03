@@ -17,6 +17,7 @@ function parseArgs(argv) {
     minImages: null,
     maxRounds: null,
     reuseChat: false,
+    directPrompt: false,
     timeoutMs: 600000,
     idleTimeoutMs: 15000,
     pollMs: 3000,
@@ -45,6 +46,10 @@ function parseArgs(argv) {
       options.sessionFile = path.resolve(process.cwd(), argv[++i]);
     } else if (arg === '--reuse-chat') {
       options.reuseChat = true;
+    } else if (arg === '--direct-prompt') {
+      options.directPrompt = true;
+    } else if (arg === '--image-mode') {
+      options.directPrompt = false;
     } else if (arg === '--timeout-ms' && argv[i + 1]) {
       options.timeoutMs = Number(argv[++i]);
     } else if (arg === '--idle-timeout-ms' && argv[i + 1]) {
@@ -99,7 +104,10 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   assertSetupReady(options);
 
-  const { browser, page } = await openChatGPTImageChat(options.cdpUrl, { reuseChat: options.reuseChat });
+  const { browser, page } = await openChatGPTImageChat(options.cdpUrl, {
+    reuseChat: options.reuseChat,
+    directPrompt: options.directPrompt,
+  });
   try {
     const result = await runImageBatch(page, options);
     const meta = {

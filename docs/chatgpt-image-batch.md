@@ -37,6 +37,14 @@ You can still generate multiple same-brief variants from one prompt file:
 npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9333 --prompt-file C:\path\to\prompt.txt --count 4 --output-dir C:\path\to\outputs --output-prefix variant --meta C:\path\to\outputs\run-meta.json
 ```
 
+For a single-response multi-image MVP test, use the dedicated probe:
+
+```powershell
+npm run chatgpt:image-multi-mvp -- --cdp-url http://127.0.0.1:9333 --prompt-file C:\path\to\prompt.txt --expected-images 3 --output-dir C:\path\to\outputs --output-prefix images2-mvp --meta C:\path\to\outputs\run-meta.json
+```
+
+This script sends one prompt and waits for multiple generated image nodes from that one assistant response. It is for probing ChatGPT web behavior, not for ordered production slide generation.
+
 ## Important Options
 
 - `--prompt-dir <dir>`
@@ -80,6 +88,16 @@ This avoids the slower UI path of selecting each thumbnail, opening the image vi
 ## Current Behavior Notes
 
 In manual testing with the `school-property-inventory-115` prompts, normal image mode often produced one image per response even when asked for several separate images in one request. In later testing with Thinking mode and an uploaded brand reference, ChatGPT produced two distinct generated images in one assistant response; both were downloadable directly from DOM estuary URLs.
+
+On 2026-05-27, an `ai-admin-workbench` MVP confirmed the same pattern more directly:
+
+- `Instant` mode: one prompt asking for three independent 16:9 images produced and downloaded only 1 image.
+- `Thinking` mode: the same prompt produced and downloaded 3 independent images in one response.
+- The generated response used one main preview plus thumbnail images. Thumbnail nodes had small on-screen dimensions, but their `/backend-api/estuary/content?id=file_...` URLs downloaded full PNG files.
+
+For ChatGPT web multi-image batches, switch the composer model from `Instant` to `Thinking` before sending the prompt. Treat this as observed UI behavior rather than an official API contract. The API path has an explicit `n` parameter for multiple images; the ChatGPT web path must be verified against the current UI.
+
+On 2026-07-03, the current ChatGPT web UI exposed a home-composer shortcut labeled `建立圖像`. Clicking it changed the composer into a `創作圖像` action state. The automation should preserve that action state when filling the prompt; clearing the whole composer removes the image action and can make ChatGPT treat a wrapped prompt as an image-editing request that waits for an uploaded image. The current default route is explicit image mode, while `--direct-prompt` remains available for simpler prompts. Smoke tests produced downloadable `/backend-api/estuary/content?id=file_...` PNGs, but one run hung after sending with no assistant image response; treat that as a ChatGPT web-side transient and rerun before changing selectors.
 
 For a real deck sequence, be careful about putting all slide prompts into one combined prompt and asking ChatGPT to pick `image N of total`; that caused slide-order drift in testing. Use `--prompt-dir` when each slide must follow its own exact prompt. Use single-prompt multi-image generation for variants or for small batches where a combined prompt is acceptable.
 

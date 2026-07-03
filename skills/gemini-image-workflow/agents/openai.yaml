@@ -1,4 +1,4 @@
 interface:
   display_name: "Gemini Image Workflow"
-  short_description: "用 Gemini 連續產生圖片"
-  default_prompt: "請幫我用 Gemini 依照提示詞連續產生圖片，需要時沿用同一個對話來維持風格一致。"
+  short_description: "用 Gemini 工作瀏覽器產圖"
+  default_prompt: "請用 Gemini 工作瀏覽器依照提示詞連續產生圖片，需要時沿用同一個對話來維持風格一致。"

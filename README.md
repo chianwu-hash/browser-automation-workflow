@@ -122,6 +122,19 @@ The older `cbs-workflows` foundation remains supported for repos or machines tha
 
 This repo can consume either an explicit `--cdp-url` or a session config produced by `cbs-workflows`.
 
+## Installed Skill Usage
+
+After installing the skills into Codex, include `工作瀏覽器` in user-facing requests so Codex chooses the browser workflow instead of the built-in image generator.
+
+Recommended prompts:
+
+```text
+請用 ChatGPT 工作瀏覽器幫我生成「雨中即景」照片。
+請用 Gemini 工作瀏覽器幫我生成「雨中即景」照片。
+```
+
+Avoid vague prompts such as `用 ChatGPT 生成圖片`; they can be interpreted as a normal image-generation request and may trigger the built-in imagegen tool instead of this repo's browser workflows.
+
 ## Formal Modules
 
 ### ChatGPT Image Batch

@@ -1,11 +1,11 @@
 ---
 name: gemini-image-workflow
-description: Run Gemini browser-based image workflows through an already logged-in CDP session, including app-and-port session setup, fresh-chat image mode entry, same-chat prompt sequencing, and optional Google Drive reference insertion. Use when Codex needs to automate Gemini image generation with repeatable prompt files, preserve same-conversation style continuity, or handle Gemini UI state such as image mode, Workspace dialogs, and Drive picker tabs.
+description: Run Gemini work-browser image workflows through an already logged-in CDP session. Use when the user says Gemini 工作瀏覽器, 工作瀏覽器生成圖片, or asks Codex to generate images with Gemini instead of built-in imagegen. Supports fresh-chat image mode entry, same-chat prompt sequencing, repeatable prompt files, optional Google Drive reference insertion, and Gemini UI handling such as image mode, Workspace dialogs, and Drive picker tabs.
 ---
 
 # Gemini Image Workflow
 
-Use this skill when the task is to operate Gemini image generation through a real logged-in browser session instead of a product API.
+Use this skill when the task is to operate Gemini image generation through the AI work browser instead of the built-in imagegen tool or a product API.
 
 ## Quickstart
 
@@ -13,6 +13,12 @@ Use this skill when the task is to operate Gemini image generation through a rea
 2. Confirm the endpoint with `cdp-status`.
 3. Log in to Gemini in that browser if needed.
 4. Run `npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:9222 --prompt-dir <dir>`.
+
+To trigger this skill reliably, include `Gemini 工作瀏覽器` or `工作瀏覽器` in the request, for example:
+
+```text
+請用 Gemini 工作瀏覽器幫我生成「雨中即景」照片。
+```
 
 The older `cbs-workflows` session-file route remains supported when a project or machine still uses generated browser session configs.
 

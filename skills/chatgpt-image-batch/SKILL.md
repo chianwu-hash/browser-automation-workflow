@@ -1,11 +1,11 @@
 ---
 name: chatgpt-image-batch
-description: Run ChatGPT web image-generation workflows through an already logged-in CDP browser session. Use when Codex needs to generate one image per UTF-8 prompt file, produce same-brief variants, probe whether ChatGPT can return multiple images from one response, preserve ChatGPT image mode, or download generated ChatGPT Images from DOM estuary URLs.
+description: Run ChatGPT work-browser image-generation workflows through an already logged-in CDP browser session. Use when the user says ChatGPT 工作瀏覽器, 工作瀏覽器生成圖片, or asks Codex to generate images with ChatGPT instead of built-in imagegen. Supports one image per UTF-8 prompt file, same-brief variants, multi-image response probes, ChatGPT image mode preservation, and generated-image DOM estuary URL downloads.
 ---
 
 # ChatGPT Image Batch
 
-Use this skill when the task is to operate ChatGPT web image generation through a real logged-in browser session instead of an API.
+Use this skill when the task is to operate ChatGPT web image generation through the AI work browser instead of the built-in imagegen tool or an API.
 
 ## Quickstart
 
@@ -13,6 +13,12 @@ Use this skill when the task is to operate ChatGPT web image generation through 
 2. Confirm the endpoint with `cdp-status`.
 3. Log in to ChatGPT in that browser if needed.
 4. Prefer UTF-8 prompt files over inline prompt text, especially for Chinese prompts.
+
+To trigger this skill reliably, include `ChatGPT 工作瀏覽器` or `工作瀏覽器` in the request, for example:
+
+```text
+請用 ChatGPT 工作瀏覽器幫我生成「雨中即景」照片。
+```
 
 Run one image per prompt file:
 

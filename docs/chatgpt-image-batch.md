@@ -18,8 +18,8 @@ This preserves visual continuity while avoiding long waits for images that may n
 Prepare a logged-in AI work browser:
 
 ```powershell
-cdp-launch chatgpt
-cdp-status
+npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes
+npm run browser:status -- --ports 9222
 $env:CDP_URL = "http://127.0.0.1:9222"
 ```
 

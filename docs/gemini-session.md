@@ -40,16 +40,15 @@ Those belong to `gemini-image-workflow`.
 
 Before a Gemini workflow runs, prepare a browser that is already logged in and reachable through CDP.
 
-On this machine, prefer the shared local CDP launcher:
+Use the repo's CBS initializer. CBS installs and calls `cdp-tools`
+transitively, so the same command works on a clean machine:
 
 ```powershell
-cdp-launch chatgpt
-cdp-status
+npm run browser:init -- -- --app gemini --browser chrome --port 9222 --yes
+npm run browser:status -- --ports 9222
 $env:CDP_URL = "http://127.0.0.1:9222"
 npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir templates\gemini-sequence
 ```
-
-The older `cbs-workflows` initializer remains supported for machines or repos that still use generated session files.
 
 The initializer answers:
 
@@ -59,27 +58,21 @@ The initializer answers:
 - which persistent profile / user data dir stores login state
 - whether Playwright can connect through CDP
 
-Relevant files:
+Session-file flow:
 
-- `..\cbs-workflows\lib\browser-session-init\index.js`
-- `..\cbs-workflows\scripts\browser-session-setup.js`
-- `..\cbs-workflows\docs\browser-session-init.md`
-
-Legacy session-file flow:
-
-1. From `..\cbs-workflows`, run `npm run browser:init` and choose Gemini, or use `npm run browser:init -- -- --app gemini --yes`
+1. Run `npm run browser:init -- -- --app gemini --browser chrome --port 9222 --yes`
 2. Log in to Gemini in the browser opened by the initializer
 3. Let the initializer write `.browser-sessions/<name>.json`
 4. Run Gemini with either:
 
 ```powershell
-npm run gemini:image-sequence -- -- --session-file ..\cbs-workflows\.browser-sessions\<name>.json --prompt-dir templates\gemini-sequence
+npm run gemini:image-sequence -- -- --session-file .browser-sessions\<name>.json --prompt-dir templates\gemini-sequence
 ```
 
 or:
 
 ```powershell
-npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:<legacy-port> --prompt-dir templates\gemini-sequence
+npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:<port> --prompt-dir templates\gemini-sequence
 ```
 
 ## Design Notes

@@ -6,20 +6,23 @@ Many AI tools are easiest to automate after a human has already logged in.
 
 The workflow pattern in this repo is:
 
-1. Prepare a logged-in browser session through the shared local CDP launcher, or through the older `cbs-workflows` session-file route.
+1. Prepare a logged-in browser session through the repo's CBS initializer.
 2. Reuse that browser session through CDP.
 3. Detect the correct page and current UI state.
 4. Execute prompts or workflow steps from UTF-8 files.
 5. Wait for observable completion signals.
 6. Save evidence such as screenshots and JSON metadata.
 
-On this machine, the normal setup path is:
+The normal setup path on every machine is:
 
 ```powershell
-cdp-launch chatgpt
-cdp-status
+npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes
+npm run browser:status -- --ports 9222
 $env:CDP_URL = "http://127.0.0.1:9222"
 ```
+
+CBS is a direct dependency and `cdp-tools` is its transitive dependency. The
+top-level workflow never launches Chrome directly.
 
 ## Shared Concerns
 

@@ -73,7 +73,7 @@ function parseArgs(argv) {
     throw new Error(
       [
         'Missing required --cdp-url <url> or --session-file <file>.',
-        'Run `cdp-launch chatgpt` first, confirm the endpoint with `cdp-status`, and pass --cdp-url http://127.0.0.1:9222.',
+        'Run `npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes`, confirm with `npm run browser:status -- --ports 9222`, and pass --cdp-url http://127.0.0.1:9222.',
       ].join(' ')
     );
   }

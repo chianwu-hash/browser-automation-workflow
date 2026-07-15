@@ -9,8 +9,8 @@ Use this skill when the task is to operate Gemini image generation through the A
 
 ## Quickstart
 
-1. Run `cdp-launch chatgpt` to open the shared AI work browser.
-2. Confirm the endpoint with `cdp-status`.
+1. Run `npm run browser:init -- -- --app gemini --browser chrome --port 9222 --yes` from the workflow repo.
+2. Confirm the endpoint with `npm run browser:status -- --ports 9222`.
 3. Log in to Gemini in that browser if needed.
 4. Run `npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:9222 --prompt-dir <dir>`.
 
@@ -32,7 +32,7 @@ If you need a brand or character reference image from Drive, add:
 
 ### 1. Prepare the session
 
-- Use the shared local CDP launcher first unless the project documents a different browser setup.
+- Use the repo's CBS initializer. It installs and calls `cdp-tools` transitively; do not require a machine-global launcher.
 - Prefer an explicit `--cdp-url`, normally `http://127.0.0.1:9222` on this machine.
 - Confirm the operator has logged into Gemini in the browser tied to that port.
 

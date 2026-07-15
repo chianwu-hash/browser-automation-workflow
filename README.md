@@ -73,13 +73,17 @@ npm run skills:install:force
 
 Restart Codex after installing or updating skills.
 
-Open the shared AI work browser, then confirm the CDP endpoint:
+Open the shared AI work browser through the repo-owned CBS entry point, then
+confirm the CDP endpoint:
 
 ```powershell
-cdp-launch chatgpt
-cdp-status
+npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes
+npm run browser:status -- --ports 9222
 $env:CDP_URL = "http://127.0.0.1:9222"
 ```
+
+`npm install` brings in `cbs-workflows`, which brings in `cdp-tools`. No
+machine-global CDP commands or PATH changes are required.
 
 Run the browser smoke test:
 
@@ -109,9 +113,9 @@ npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir template
 
 Recommended order:
 
-1. run `cdp-launch chatgpt`
+1. run `npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes`
 2. log in to the sites needed by the workflow, such as ChatGPT and Gemini
-3. confirm the endpoint with `cdp-status`
+3. confirm the endpoint with `npm run browser:status -- --ports 9222`
 4. pass `--cdp-url $env:CDP_URL` to the workflow command
 
 ## Design Principles
@@ -124,19 +128,18 @@ Recommended order:
 
 ## Browser Foundation
 
-On this machine, prefer the shared local CDP tools:
+The runtime dependency chain is:
 
-- `cdp-launch chatgpt`
-- `cdp-status`
-- default `CDP_URL=http://127.0.0.1:9222`
+```text
+browser-automation-workflow
+  -> cbs-workflows
+    -> cdp-tools
+```
 
-The older `cbs-workflows` foundation remains supported for repos or machines that still use generated session files:
-
-- `cbs-workflows`
-- https://github.com/chianwu-hash/cbs-workflows
-- `npm run browser:init:legacy`
-
-This repo can consume either an explicit `--cdp-url` or a session config produced by `cbs-workflows`.
+This repository calls CBS-facing commands only. CBS owns guided session setup
+and delegates browser discovery, profiles, ports, launch, and status checks to
+`cdp-tools`. Workflows can consume either an explicit local `--cdp-url` or a
+session config produced by CBS.
 
 ## Installed Skill Usage
 

@@ -2,18 +2,10 @@
 
 ## Browser Foundation
 
-The workflows in this repo need an already logged-in browser exposed through Chrome DevTools Protocol.
-
-On this machine, prefer the shared local CDP launcher:
-
-- `cdp-launch chatgpt`
-- `cdp-status`
-- `CDP_URL=http://127.0.0.1:9222`
-
-The older `cbs-workflows` session-file route is still supported for portability and for machines that do not use the shared launcher:
-
-- local sibling repo: `..\cbs-workflows`
-- remote repo: `https://github.com/chianwu-hash/cbs-workflows`
+The workflows in this repo need an already logged-in browser exposed through
+Chrome DevTools Protocol. Browser setup always enters through the direct
+`cbs-workflows` dependency; CBS delegates low-level lifecycle work to its
+`cdp-tools` dependency.
 
 Purpose:
 
@@ -25,7 +17,9 @@ Purpose:
 - verify Playwright can connect through CDP
 - write a reusable local session config
 
-This repository consumes either an explicit `--cdp-url` or the generated session config file and uses its `cdpUrl`.
+This repository consumes either an explicit `--cdp-url` or the generated
+session config file and uses its `cdpUrl`. It does not require transitive
+`cdp-launch` binaries to be visible at the top level.
 
 ## ChatGPT Module
 

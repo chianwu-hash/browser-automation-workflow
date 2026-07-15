@@ -9,8 +9,8 @@ Use this skill when the task is to operate ChatGPT web image generation through 
 
 ## Quickstart
 
-1. Run `cdp-launch chatgpt` to open the shared AI work browser.
-2. Confirm the endpoint with `cdp-status`.
+1. Run `npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes` from the workflow repo.
+2. Confirm the endpoint with `npm run browser:status -- --ports 9222`.
 3. Log in to ChatGPT in that browser if needed.
 4. Prefer UTF-8 prompt files over inline prompt text, especially for Chinese prompts.
 
@@ -42,7 +42,7 @@ npm run chatgpt:image-multi-mvp -- -- --cdp-url http://127.0.0.1:9222 --prompt-f
 
 ### 1. Prepare the session
 
-- Use the shared local CDP launcher first unless the project documents a different browser setup.
+- Use the repo's CBS initializer. It installs and calls `cdp-tools` transitively; do not require a machine-global launcher.
 - Prefer an explicit `--cdp-url`, normally `http://127.0.0.1:9222` on this machine.
 - Confirm ChatGPT is logged in before running the workflow.
 

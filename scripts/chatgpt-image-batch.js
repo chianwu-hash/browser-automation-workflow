@@ -89,7 +89,7 @@ function assertSetupReady(options) {
     throw new Error(
       [
         'Missing required --cdp-url <url>.',
-        'Run `cdp-launch chatgpt` first, confirm the endpoint with `cdp-status`, and log in to ChatGPT in that browser.',
+        'Run `npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes` first, then confirm with `npm run browser:status -- --ports 9222`.',
         'Then pass either --cdp-url http://127.0.0.1:9222 or a legacy --session-file <file>.',
       ].join(' ')
     );

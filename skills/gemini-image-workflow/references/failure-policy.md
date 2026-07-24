@@ -9,6 +9,13 @@ Use these rules when the Gemini workflow fails.
 - If the project uses legacy session files, ask for `--session-file <file>` instead.
 - Do not silently assume the browser is already running.
 
+## Not Logged In
+
+- Stop immediately.
+- Ask the operator to sign in to Gemini in the opened work browser.
+- After the operator says they are logged in, rerun the same workflow with the same CDP URL.
+- Treat disabled image-mode controls on a signed-out page as a login boundary, not as selector drift.
+
 ## No Gemini tab found
 
 - Verify the operator opened Gemini in the browser launched with the chosen remote debugging port.

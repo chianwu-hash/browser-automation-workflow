@@ -9,6 +9,13 @@ Use these rules when the ChatGPT image workflow fails.
 - If the project uses legacy session files, ask for `--session-file <file>` instead.
 - Do not silently assume the browser is already running.
 
+## Not Logged In
+
+- Stop immediately.
+- Ask the operator to sign in to ChatGPT in the opened work browser.
+- After the operator says they are logged in, rerun the same workflow with the same CDP URL.
+- Treat this as a session boundary, not as selector drift or image-mode failure.
+
 ## Cannot Enter Image Mode
 
 - Check whether the current UI exposes `建立圖像` or the `創作圖像` action state.

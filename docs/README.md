@@ -4,6 +4,12 @@ This folder contains the reusable operating knowledge for browser-based AI autom
 
 Current core documents:
 
+- `PROJECT_MEMORY.md`
+  repo-local AI memory, durable decisions, and safety boundaries
+- `RUNBOOK.md`
+  repeatable operating procedures and validation rules
+- `OPERATIONS_LOG.md`
+  dated major changes and memory-relevant operations
 - `browser-automation-workflow.md`
   workflow foundations
 - `chatgpt-image-batch.md`

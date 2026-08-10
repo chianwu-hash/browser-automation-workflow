@@ -4,7 +4,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const SOURCE_ROOT = path.join(ROOT, 'skills');
-const DEFAULT_SKILLS = ['chatgpt-image-batch', 'gemini-image-workflow'];
+const DEFAULT_SKILLS = ['ai-work-browser', 'chatgpt-image-batch', 'gemini-image-workflow'];
 
 function isInside(parent, target) {
   const relative = path.relative(parent, target);

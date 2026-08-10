@@ -9,9 +9,9 @@ Use this skill when the task is to operate ChatGPT web image generation through 
 
 ## Quickstart
 
-1. Run `npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes` from the workflow repo.
-2. Confirm the endpoint with `npm run browser:status -- --ports 9222`.
-3. Log in to ChatGPT in that browser if needed.
+1. Open or validate the AI work browser first. If the `ai-work-browser` skill is available, use it for this step.
+2. Use `http://127.0.0.1:9232` as the default CDP URL.
+3. Log in to ChatGPT in that browser if needed; the user must do login manually.
 4. Prefer UTF-8 prompt files over inline prompt text, especially for Chinese prompts.
 
 To trigger this skill reliably, include `ChatGPT 工作瀏覽器` or `工作瀏覽器` in the request, for example:
@@ -23,27 +23,28 @@ To trigger this skill reliably, include `ChatGPT 工作瀏覽器` or `工作瀏�
 Run one image per prompt file:
 
 ```powershell
-npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9222 --prompt-dir <dir> --output-dir <out>
+npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9232 --prompt-dir <dir> --output-dir <out>
 ```
 
 Run same-brief variants from one prompt file:
 
 ```powershell
-npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9222 --prompt-file <file> --count 4 --output-dir <out>
+npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --count 4 --output-dir <out>
 ```
 
 Probe a single response for multiple images:
 
 ```powershell
-npm run chatgpt:image-multi-mvp -- -- --cdp-url http://127.0.0.1:9222 --prompt-file <file> --expected-images 3 --output-dir <out>
+npm run chatgpt:image-multi-mvp -- -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --expected-images 3 --output-dir <out>
 ```
 
 ## Core Workflow
 
 ### 1. Prepare the session
 
-- Use the repo's CBS initializer. It installs and calls `cdp-tools` transitively; do not require a machine-global launcher.
-- Prefer an explicit `--cdp-url`, normally `http://127.0.0.1:9222` on this machine.
+- Use `ai-work-browser` to open or validate the shared browser state when available.
+- If no `ai-work-browser` launcher is available, use the repo's CBS initializer: `npm run browser:init -- --app chatgpt --browser chrome --port 9232 --yes`.
+- Prefer an explicit `--cdp-url`, normally `http://127.0.0.1:9232`.
 - Confirm ChatGPT is logged in before running the workflow.
 
 ### 2. Choose the mode

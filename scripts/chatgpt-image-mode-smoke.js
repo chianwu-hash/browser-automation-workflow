@@ -11,7 +11,7 @@ function parseOptions(argv) {
   const { values } = parseArgs({
     args: argv,
     options: {
-      'cdp-url': { type: 'string', default: process.env.CDP_URL || 'http://127.0.0.1:9222' },
+      'cdp-url': { type: 'string', default: process.env.CDP_URL || 'http://127.0.0.1:9232' },
       trials: { type: 'string', default: '3' },
     },
     strict: true,

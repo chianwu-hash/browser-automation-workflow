@@ -9,10 +9,10 @@ Use this skill when the task is to operate Gemini image generation through the A
 
 ## Quickstart
 
-1. Run `npm run browser:init -- -- --app gemini --browser chrome --port 9222 --yes` from the workflow repo.
-2. Confirm the endpoint with `npm run browser:status -- --ports 9222`.
-3. Log in to Gemini in that browser if needed.
-4. Run `npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:9222 --prompt-dir <dir>`.
+1. Open or validate the AI work browser first. If the `ai-work-browser` skill is available, use it for this step.
+2. Use `http://127.0.0.1:9232` as the default CDP URL.
+3. Log in to Gemini in that browser if needed; the user must do login manually.
+4. Run `npm run gemini:image-sequence -- -- --cdp-url http://127.0.0.1:9232 --prompt-dir <dir>`.
 
 To trigger this skill reliably, include `Gemini 工作瀏覽器` or `工作瀏覽器` in the request, for example:
 
@@ -32,8 +32,9 @@ If you need a brand or character reference image from Drive, add:
 
 ### 1. Prepare the session
 
-- Use the repo's CBS initializer. It installs and calls `cdp-tools` transitively; do not require a machine-global launcher.
-- Prefer an explicit `--cdp-url`, normally `http://127.0.0.1:9222` on this machine.
+- Use `ai-work-browser` to open or validate the shared browser state when available.
+- If no `ai-work-browser` launcher is available, use the repo's CBS initializer: `npm run browser:init -- --app gemini --browser chrome --port 9232 --yes`.
+- Prefer an explicit `--cdp-url`, normally `http://127.0.0.1:9232`.
 - Confirm the operator has logged into Gemini in the browser tied to that port.
 
 ### 2. Open a safe Gemini state

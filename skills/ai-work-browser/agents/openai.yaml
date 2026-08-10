@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Work Browser"
+  short_description: "開啟並重用 AI 工作瀏覽器"
+  default_prompt: "請開啟 AI 工作瀏覽器，沿用之前的登入狀態；如果需要重新登入，請停下來讓我自己登入。"

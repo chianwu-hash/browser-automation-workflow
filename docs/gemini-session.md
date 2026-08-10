@@ -44,9 +44,9 @@ Use the repo's CBS initializer. CBS installs and calls `cdp-tools`
 transitively, so the same command works on a clean machine:
 
 ```powershell
-npm run browser:init -- -- --app gemini --browser chrome --port 9222 --yes
-npm run browser:status -- --ports 9222
-$env:CDP_URL = "http://127.0.0.1:9222"
+npm run browser:init -- -- --app gemini --browser chrome --port 9232 --yes
+npm run browser:status -- --ports 9232
+$env:CDP_URL = "http://127.0.0.1:9232"
 npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir templates\gemini-sequence
 ```
 
@@ -60,7 +60,7 @@ The initializer answers:
 
 Session-file flow:
 
-1. Run `npm run browser:init -- -- --app gemini --browser chrome --port 9222 --yes`
+1. Run `npm run browser:init -- -- --app gemini --browser chrome --port 9232 --yes`
 2. Log in to Gemini in the browser opened by the initializer
 3. Let the initializer write `.browser-sessions/<name>.json`
 4. Run Gemini with either:

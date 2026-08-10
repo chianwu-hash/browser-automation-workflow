@@ -20,7 +20,7 @@ function parseArgs(argv) {
     options.cdpUrl = readCdpUrlFromSessionFile(options.sessionFile);
   }
 
-  options.cdpUrl = options.cdpUrl || 'http://127.0.0.1:9222';
+  options.cdpUrl = options.cdpUrl || 'http://127.0.0.1:9232';
   return options;
 }
 

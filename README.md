@@ -73,13 +73,20 @@ npm run skills:install:force
 
 Restart Codex after installing or updating skills.
 
-Open the shared AI work browser through the repo-owned CBS entry point, then
-confirm the CDP endpoint:
+Open the shared AI work browser. If your machine has `ai-browser-launch`, use
+that stable launcher:
 
 ```powershell
-npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes
-npm run browser:status -- --ports 9222
-$env:CDP_URL = "http://127.0.0.1:9222"
+ai-browser-launch https://chatgpt.com/
+ai-browser-launch -Status
+```
+
+Otherwise, use the repo-owned CBS entry point, then confirm the CDP endpoint:
+
+```powershell
+npm run browser:init -- -- --app chatgpt --browser chrome --port 9232 --yes
+npm run browser:status -- --ports 9232
+$env:CDP_URL = "http://127.0.0.1:9232"
 ```
 
 `npm install` brings in `cbs-workflows`, which brings in `cdp-tools`. No
@@ -113,9 +120,9 @@ npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir template
 
 Recommended order:
 
-1. run `npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes`
+1. open the AI work browser with `ai-browser-launch`, or run `npm run browser:init -- -- --app chatgpt --browser chrome --port 9232 --yes`
 2. log in to the sites needed by the workflow, such as ChatGPT and Gemini
-3. confirm the endpoint with `npm run browser:status -- --ports 9222`
+3. confirm the endpoint with `npm run browser:status -- --ports 9232`
 4. pass `--cdp-url $env:CDP_URL` to the workflow command
 
 ## Design Principles
@@ -143,11 +150,12 @@ session config produced by CBS.
 
 ## Installed Skill Usage
 
-After installing the skills into Codex, include `工作瀏覽器` in user-facing requests so Codex chooses the browser workflow instead of the built-in image generator.
+After installing the skills into Codex, use `開啟 AI 工作瀏覽器` when you want Codex to reopen the same logged-in work browser. Include `ChatGPT 工作瀏覽器` or `Gemini 工作瀏覽器` when you want a product-specific image workflow instead of the built-in image generator.
 
 Recommended prompts:
 
 ```text
+開啟 AI 工作瀏覽器。
 請用 ChatGPT 工作瀏覽器幫我生成「雨中即景」照片。
 請用 Gemini 工作瀏覽器幫我生成「雨中即景」照片。
 ```
@@ -175,6 +183,12 @@ Together they provide:
 See:
 
 - [docs/chatgpt-image-batch.md](docs/chatgpt-image-batch.md)
+
+### AI Work Browser
+
+- `skills/ai-work-browser/SKILL.md`
+
+This skill owns the browser entry point and safety boundary: reuse the same AI work browser, preserve login state when possible, and default downstream workflows to `http://127.0.0.1:9232`.
 
 ### Gemini Image Workflow
 

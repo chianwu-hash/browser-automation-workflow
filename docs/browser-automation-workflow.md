@@ -13,12 +13,22 @@ The workflow pattern in this repo is:
 5. Wait for observable completion signals.
 6. Save evidence such as screenshots and JSON metadata.
 
-The normal setup path on every machine is:
+The normal default CDP URL is `http://127.0.0.1:9232`.
+
+If `ai-browser-launch` is available, open or reuse the browser with:
 
 ```powershell
-npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes
-npm run browser:status -- --ports 9222
-$env:CDP_URL = "http://127.0.0.1:9222"
+ai-browser-launch
+ai-browser-launch https://chatgpt.com/
+ai-browser-launch -Status
+```
+
+Otherwise, use the repo setup path:
+
+```powershell
+npm run browser:init -- -- --app chatgpt --browser chrome --port 9232 --yes
+npm run browser:status -- --ports 9232
+$env:CDP_URL = "http://127.0.0.1:9232"
 ```
 
 CBS is a direct dependency and `cdp-tools` is its transitive dependency. The

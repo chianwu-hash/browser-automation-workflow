@@ -4,6 +4,27 @@ This file records dated changes that future AI assistants and maintainers may ne
 
 Do not record secrets, cookies, tokens, full session configs, private browser profile data, sensitive screenshot contents, or account credentials.
 
+## 2026-08-12 — Remove product-specific prompt injection from the generic ChatGPT runner
+
+Changed:
+
+- Removed the hard-coded AI administrative workbench deck block from `lib/chatgpt/image-batch.js`.
+- Removed hard-coded Dingxi mascot size, anatomy, and crest-corner rules from the generic runner.
+- Generalized sequence wording from slides/presentations to images/items.
+- Kept only orchestration instructions required to request one new standalone image per round.
+- Updated workflow docs and the bundled ChatGPT skill contract to make prompt files authoritative for brand and layout rules.
+
+Reason:
+
+- LINE cards, posters, formal decks, and mascot-led visuals require different prominence and layout rules.
+- The generic runner previously forced formal-deck and fixed-corner assumptions into unrelated image tasks.
+
+Validation:
+
+- `npm run check`
+- `npm run smoke:prompt-construction`
+- Prompt-construction assertions confirm no Dingxi, AI-workbench, fixed-percentage, or fixed-corner text is injected.
+
 ## 2026-08-12 — Add step-level verification to image workflows
 
 Changed:

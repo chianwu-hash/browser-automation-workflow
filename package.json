@@ -16,6 +16,7 @@
     "chatgpt:image-mode-smoke": "node scripts/chatgpt-image-mode-smoke.js",
     "chatgpt:image-multi-mvp": "node scripts/chatgpt-image-multi-mvp.js",
     "gemini:image-sequence": "node scripts/gemini-image-sequence.js",
+    "smoke:prompt-construction": "node scripts/prompt-construction-smoke.js",
     "smoke:step-verification": "node scripts/step-verification-smoke.js"
   },
   "dependencies": {

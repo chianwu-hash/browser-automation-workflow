@@ -37,6 +37,7 @@ Use these rules when the ChatGPT image workflow fails.
 ## Prompt Issues
 
 - Prefer UTF-8 prompt files over inline PowerShell strings.
+- Treat the prompt file as authoritative for output type, brand identity, mascot prominence, and overlay placement. The generic runner must not silently inject project-specific rules.
 - If the prompt mentions Dingxi mascots or brand assets, inspect outputs for anatomy, identity, and fake-logo errors before use.
 
 ## Send not accepted

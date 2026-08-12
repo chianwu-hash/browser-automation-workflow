@@ -56,6 +56,7 @@ npm run chatgpt:image-multi-mvp -- -- --cdp-url http://127.0.0.1:9232 --prompt-f
 ### 3. Run generation
 
 - Keep prompt files as UTF-8 `.txt`.
+- Put all output-specific layout, brand, mascot, text, and overlay requirements in the prompt files. The generic runner does not inject product-specific rules or fixed sizing/corner assumptions.
 - Let the workflow start a fresh chat unless `--reuse-chat` is intentional.
 - Use default image-mode behavior for production; use `--direct-prompt` only for simple probes.
 - Expect ChatGPT web behavior to vary by model/mode and rerun once before changing selectors.
@@ -102,5 +103,6 @@ This skill is not for:
 
 - automating ChatGPT login
 - final slide composition
+- deciding product-specific brand rules, mascot prominence, or crest placement on behalf of the prompt source
 - guaranteeing that ChatGPT web will produce multiple images in one response
 - editing or uploading reference images as a formal production path

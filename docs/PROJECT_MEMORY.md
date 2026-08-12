@@ -1,6 +1,6 @@
 # Project Memory
 
-Last reviewed: 2026-08-08
+Last reviewed: 2026-08-12
 
 ## Project identity
 
@@ -68,6 +68,7 @@ Core behavior:
 - keep single-response multi-image probing separate from ordered production generation
 - download distinct generated images from ChatGPT `/backend-api/estuary/content?id=file_...` URLs using page credentials
 - write metadata with output paths, source URLs, byte sizes, SHA-256 hashes, and generated image IDs
+- preserve prompt-file authority instead of silently injecting project-specific brand or deck rules
 
 Known ChatGPT UI facts:
 
@@ -108,6 +109,23 @@ Known Gemini UI facts:
 - Drive picker actions should be scoped to the picker frame and may need to handle Google Workspace connect dialogs.
 
 ## Active decisions
+
+### 2026-08-12 Keep product and brand rules in prompt files
+
+Status: active
+Scope: ChatGPT image batch prompt construction
+Source: `lib/chatgpt/image-batch.js`, Dingxi LINE-card review
+
+Decision:
+
+- The generic image runner adds only orchestration instructions needed for one-image-per-round generation.
+- It does not inject Dingxi mascot rules, fixed mascot percentages, crest corners, AI-workbench content, formal-deck styling, or other product-specific instructions.
+- Each UTF-8 prompt file owns its output type, brand rules, mascot identity, layout, and overlay requirements.
+
+Reason:
+
+- A universal formal-deck block incorrectly constrained LINE cards, posters, and mascot-led visuals.
+- Product-specific rules in reusable infrastructure created conflicting crest positions and unrelated project context.
 
 ### 2026-08-12 Verify every browser-writing step before waiting
 

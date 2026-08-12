@@ -136,6 +136,7 @@ Prerequisites:
 - CDP endpoint is confirmed.
 - ChatGPT is logged in manually.
 - Prompt text is stored in UTF-8 `.txt` files.
+- Each prompt file already contains every output-specific layout, brand, mascot, and overlay rule needed for that image. The generic runner does not inject product-specific rules.
 
 Recommended deck mode:
 

@@ -5,6 +5,8 @@ const {
   writeRunMeta,
 } = require('../lib/chatgpt');
 const { readCdpUrlFromSessionFile } = require('../lib/session-setup');
+const { escalateToCodexCli } = require('../lib/escalation/codex-cli');
+const { captureBrowserEvidence } = require('../lib/escalation/browser-evidence');
 
 function parseArgs(argv) {
   const options = {
@@ -19,6 +21,7 @@ function parseArgs(argv) {
     reuseChat: false,
     directPrompt: false,
     timeoutMs: 600000,
+    generationStartTimeoutMs: 30000,
     idleTimeoutMs: 15000,
     pollMs: 3000,
     outputDir: path.resolve(process.cwd(), 'output', 'chatgpt-image-batch'),
@@ -52,6 +55,8 @@ function parseArgs(argv) {
       options.directPrompt = false;
     } else if (arg === '--timeout-ms' && argv[i + 1]) {
       options.timeoutMs = Number(argv[++i]);
+    } else if (arg === '--generation-start-timeout-ms' && argv[i + 1]) {
+      options.generationStartTimeoutMs = Number(argv[++i]);
     } else if (arg === '--idle-timeout-ms' && argv[i + 1]) {
       options.idleTimeoutMs = Number(argv[++i]);
     } else if (arg === '--poll-ms' && argv[i + 1]) {
@@ -104,13 +109,16 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   assertSetupReady(options);
 
-  const { browser, page } = await openChatGPTImageChat(options.cdpUrl, {
-    reuseChat: options.reuseChat,
-    directPrompt: options.directPrompt,
-  });
+  let browser;
+  let page;
   try {
+    ({ browser, page } = await openChatGPTImageChat(options.cdpUrl, {
+      reuseChat: options.reuseChat,
+      directPrompt: options.directPrompt,
+    }));
     const result = await runImageBatch(page, options);
     const meta = {
+      status: 'completed',
       cdpUrl: options.cdpUrl,
       sessionFile: options.sessionFile || null,
       pageUrl: page.url(),
@@ -123,8 +131,65 @@ async function main() {
     };
     writeRunMeta(options.metaPath, meta);
     console.log(JSON.stringify(meta, null, 2));
+  } catch (error) {
+    const failureMeta = {
+      status: 'failed',
+      cdpUrl: options.cdpUrl,
+      sessionFile: options.sessionFile || null,
+      pageUrl: page?.url() || null,
+      promptDir: options.promptDir || null,
+      promptFile: options.promptFile || null,
+      outputDir: options.outputDir,
+      failure: {
+        message: error.message,
+        failedAt: new Date().toISOString(),
+      },
+      escalation: null,
+      generatedAt: new Date().toISOString(),
+    };
+    writeRunMeta(options.metaPath, failureMeta);
+    const browserEvidence = error.retryAttempts >= 2
+      ? await captureBrowserEvidence(page, {
+        metaPath: options.metaPath,
+        workflow: 'chatgpt-image-batch',
+      }).catch((evidenceError) => ({
+        captureError: evidenceError.message,
+        snapshotPath: null,
+        screenshotPath: null,
+      }))
+      : null;
+    const escalation = error.retryAttempts >= 2
+      ? escalateToCodexCli({
+        workflow: 'chatgpt-image-batch',
+        error,
+        cdpUrl: options.cdpUrl,
+        metaPath: options.metaPath,
+        commandArgs: process.argv.slice(1),
+        browserEvidence,
+        additionalDirs: [
+          options.outputDir,
+          options.promptDir,
+          options.promptFile ? path.dirname(options.promptFile) : '',
+          path.dirname(options.metaPath),
+        ],
+      })
+      : null;
+    if (escalation?.resolved && escalation.workflowCompleted) {
+      console.log(JSON.stringify({ status: 'completed-by-codex-escalation', escalation }, null, 2));
+      return;
+    }
+    failureMeta.escalation = escalation;
+    failureMeta.browserEvidence = browserEvidence
+      ? {
+        snapshotPath: browserEvidence.snapshotPath || null,
+        screenshotPath: browserEvidence.screenshotPath || null,
+        captureError: browserEvidence.captureError || null,
+      }
+      : null;
+    writeRunMeta(options.metaPath, failureMeta);
+    throw error;
   } finally {
-    await browser.close();
+    await browser?.close();
   }
 }
 

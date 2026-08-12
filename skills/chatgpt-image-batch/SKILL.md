@@ -60,6 +60,26 @@ npm run chatgpt:image-multi-mvp -- -- --cdp-url http://127.0.0.1:9232 --prompt-f
 - Use default image-mode behavior for production; use `--direct-prompt` only for simple probes.
 - Expect ChatGPT web behavior to vary by model/mode and rerun once before changing selectors.
 
+### Step verification contract
+
+Every browser-writing step must prove its own success before the next long wait begins:
+
+- session: CDP page is on `chatgpt.com` and login controls are absent
+- new chat: the visible composer exists after navigation
+- image mode: the image action chip or selected mode state is visible
+- prompt fill: the visible composer contains the normalized prompt prefix
+- send: the composer no longer contains the prompt, a new user message exists, and that message matches the prompt prefix
+- generation start: within 30 seconds, observe image-specific generating text in the latest assistant turn or a new generated-image ID
+- generation completion: at least one new generated-image ID appears after the round baseline and becomes stable
+- download: the file exists, is nonzero, has a supported image signature, and its written byte count matches
+
+Use a short send-acceptance timeout. If the prompt remains in the composer, fail immediately; never spend the full generation timeout waiting for a prompt that was not sent.
+Use a separate short generation-start timeout. If the assistant completes a rejection or no generation indicator appears, fail before the long completion timeout.
+
+The generic stop-response button is not generation-start evidence by itself because ordinary text replies also expose it. Require image-specific generating text in the latest assistant turn or a new image ID.
+
+For retryable send or generation-start failures, allow at most two recovery retries. After the second retry fails, capture a browser screenshot plus structured DOM snapshot, then invoke the repo-bundled Codex CLI escalation once with structured output and recursion disabled. The CLI must first classify the incident as transient model failure, UI contract drift, or system failure. A healthy browser should receive one clean fresh-chat image-mode retry before code changes. Continue only if the CLI verifies that the original workflow completed and its artifacts are valid; otherwise report the failure immediately.
+
 ### 4. Validate artifacts
 
 - Check the metadata JSON, downloaded image count, and output file paths.

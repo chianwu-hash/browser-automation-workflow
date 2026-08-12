@@ -14,6 +14,7 @@ Each workflow run should leave enough evidence to debug the run without relying 
 
 For same-chat prompt sequences, prefer metadata shaped like:
 
+- `status` as `completed` or `failed`
 - `cdpUrl`
 - `pageUrl`
 - `promptCount`
@@ -34,6 +35,10 @@ Each `results[]` item should include:
 - `newImages`
 - `outputPath`
 - `completedAt`
+
+Each completed result should include `outputKind`, `bytes`, and machine-readable `checks` for prompt fill, send acceptance, generation detection, and artifact validation. Failed runs should still write metadata containing the failed step's error message and timestamp.
+
+When Codex CLI escalation runs, preserve a sanitized brief, browser screenshot, structured DOM snapshot, JSONL event log, structured result, and an `escalation` metadata object. Never include prompt contents, cookies, tokens, or login state in the brief or structured result.
 
 ## Validation rule
 

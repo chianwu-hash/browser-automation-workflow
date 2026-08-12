@@ -109,6 +109,31 @@ Known Gemini UI facts:
 
 ## Active decisions
 
+### 2026-08-12 Verify every browser-writing step before waiting
+
+Status: active
+Scope: ChatGPT and Gemini image workflows
+Source: live Hybrid deck test, workflow modules, skill failure policies
+
+Decision:
+
+- Treat browser workflows as checked state machines rather than a sequence of clicks and long sleeps.
+- Every step has an entry condition, success evidence, short timeout, and explicit failure.
+- Prompt send requires both composer clearance and a newly added user message matching the prompt prefix.
+- Generation start is a separate state with a 30-second deadline; a completed rejection or missing start indicator must fail before the long completion timeout.
+- Generation waits must abort early if the prompt remains in the composer or the renderer is unhealthy.
+- Downloads and screenshot fallbacks must pass file existence, byte-count, and image-signature validation.
+- Failed runs still write machine-readable metadata.
+- Retryable checked-step failures receive at most two recovery retries. A third failure invokes one repo-bundled Codex CLI escalation with recursion disabled; unresolved or unavailable escalation returns an error.
+- On Windows, escalation uses the CLI `danger-full-access` sandbox mode because the `workspace-write` sandbox helper fails during initialization on this machine. The escalation remains single-shot, prompt-constrained, recursion-disabled, and success requires verified artifacts.
+- Before CLI escalation, capture the live browser viewport and a structured snapshot of composer state, conversation-turn counts, image-mode signals, generated-image count, and renderer health.
+- The CLI is an incident commander, not a broad researcher: classify transient model failure, UI contract drift, or system failure within 60 seconds. For a healthy browser, prefer one clean fresh-chat image-mode rerun. Edit code only when live DOM evidence proves drift.
+
+Reason:
+
+- A clickable send button can fail to submit while the automation incorrectly waits for an image that can never appear.
+- Cheap state checks prevent minutes of unproductive waiting and make UI drift diagnosable.
+
 ### 2026-08-08 Use repo-owned CBS entry points for browser setup
 
 Status: active

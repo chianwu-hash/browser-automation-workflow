@@ -13,6 +13,7 @@ Expected artifacts:
 
 Metadata should include:
 
+- `status` as `completed` or `failed`
 - `cdpUrl`
 - `sessionFile` or `null`
 - `pageUrl`
@@ -32,6 +33,10 @@ Each `downloads[]` item should include:
 - `sha256`
 - `src`
 - `id`
+
+Each completed round should include machine-readable `checks` for prompt fill, send acceptance, generation detection, and artifact validation. Failed runs should still write metadata containing the failed step's error message and timestamp.
+
+When Codex CLI escalation runs, preserve a sanitized brief, browser screenshot, structured DOM snapshot, JSONL event log, structured result, and an `escalation` metadata object. Never include prompt contents, cookies, tokens, or login state in the brief or structured result.
 
 ## Multi-Image Probe Runs
 

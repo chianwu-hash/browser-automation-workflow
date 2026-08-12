@@ -21,6 +21,7 @@ function parseArgs(argv) {
     reuseChat: false,
     directPrompt: true,
     timeoutMs: 900000,
+    generationStartTimeoutMs: 30000,
     idleTimeoutMs: 20000,
     pollMs: 3000,
     outputDir: path.resolve(process.cwd(), 'output', 'chatgpt-image-multi-mvp'),
@@ -52,6 +53,8 @@ function parseArgs(argv) {
       options.directPrompt = false;
     } else if (arg === '--timeout-ms' && argv[i + 1]) {
       options.timeoutMs = Number(argv[++i]);
+    } else if (arg === '--generation-start-timeout-ms' && argv[i + 1]) {
+      options.generationStartTimeoutMs = Number(argv[++i]);
     } else if (arg === '--idle-timeout-ms' && argv[i + 1]) {
       options.idleTimeoutMs = Number(argv[++i]);
     } else if (arg === '--poll-ms' && argv[i + 1]) {
@@ -114,7 +117,7 @@ async function main() {
     const baseline = new Set((await getGeneratedImages(page)).map((item) => item.id || item.src));
     await fillPrompt(page, prompt);
     await page.waitForTimeout(500);
-    await clickSend(page);
+    const sendCheck = await clickSend(page, prompt);
 
     const detectedImages = await waitForImages(page, [...baseline], {
       minImages: options.expectedImages,
@@ -122,6 +125,9 @@ async function main() {
       pollMs: options.pollMs,
       allowPartial: options.allowPartial,
       idleTimeoutMs: options.idleTimeoutMs,
+      prompt,
+      assistantMessageCountBefore: sendCheck.assistantMessageCountBefore,
+      generationStartTimeoutMs: options.generationStartTimeoutMs,
     });
 
     const freshImages = detectedImages.filter((item) => !baseline.has(item.id || item.src));
@@ -134,6 +140,7 @@ async function main() {
     const meta = {
       mode: 'single-prompt-single-response-multi-image-mvp',
       cdpUrl: options.cdpUrl,
+      sendCheck,
       sessionFile: options.sessionFile || null,
       pageUrl: page.url(),
       promptFile: options.promptFile || null,

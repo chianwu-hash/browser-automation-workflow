@@ -39,6 +39,32 @@ Use these rules when the Gemini workflow fails.
 
 - Treat as generation failure, not download failure.
 - Save a screenshot and the run metadata before stopping.
+- Inspect whether the prompt actually left the composer. If it remains visible, the send action failed; do not wait through another full generation timeout.
+- Composer clearing alone is insufficient. Also require a new `user-query` whose normalized text matches the prompt prefix.
+- If either signal is missing after the short send timeout, stop before generation waiting begins and write failed-run metadata.
+- After send acceptance, use a separate 30-second generation-start timeout. Require the image-specific generating state or a new loaded image; a generic stop-response button is not sufficient.
+- If the model completes a rejection before generation starts, stop immediately instead of consuming the full completion timeout.
+
+## Chrome Out Of Memory
+
+- Treat Chrome's `Out of Memory` error page as a browser-process failure, not a Gemini generation timeout or selector change.
+- Preserve one screenshot of the error state, reload or restart the shared work browser, and verify the configured profile and CDP endpoint before one retry.
+- Do not repeatedly reconnect Playwright while the renderer is unresponsive; CDP handshakes may connect and then time out until the affected tab is reloaded.
+
+## Current UI Contract
+
+As verified in the Traditional Chinese Gemini UI:
+
+- prompt textbox: `role="textbox"`, aria-label `請輸入 Gemini 提示詞`
+- tools button: aria-label `上傳與工具`
+- image menu item: `role="menuitemcheckbox"`, text `建立圖像`
+- selected image chip: aria-label `取消選取「圖片」`
+- send button: aria-label `傳送訊息`
+- stop button: aria-label `停止回覆`
+- generated image: `img.image.loaded`
+- original download: `data-test-id="download-generated-image-button"` or aria-label `下載原尺寸圖片`
+
+If these selectors still match, investigate browser health and send-state verification before declaring UI drift.
 
 ## Download instability
 
@@ -55,4 +81,4 @@ Safe retries:
 - re-enter image mode
 - reopen Drive picker
 
-Do not auto-retry indefinitely. Leave artifacts from the failing attempt first.
+Do not auto-retry indefinitely. Use at most two recovery retries. If the same checked step still fails, capture a screenshot and DOM snapshot, then invoke the bundled Codex CLI escalation once. The CLI gets 60 seconds to classify transient model failure, UI contract drift, or system failure; when the browser is healthy it should prefer one fresh-chat image-mode rerun over exploratory code changes. If the CLI is unavailable, cannot diagnose the state, or cannot verify completed artifacts within the bounded escalation, write failed-run metadata and return an error. Leave artifacts from the failing attempt first.

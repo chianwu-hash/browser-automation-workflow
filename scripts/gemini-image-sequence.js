@@ -7,6 +7,8 @@ const {
   writeRunMeta,
 } = require('../lib/gemini');
 const { readCdpUrlFromSessionFile } = require('../lib/session-setup');
+const { escalateToCodexCli } = require('../lib/escalation/codex-cli');
+const { captureBrowserEvidence } = require('../lib/escalation/browser-evidence');
 
 function parseArgs(argv) {
   const options = {
@@ -18,6 +20,7 @@ function parseArgs(argv) {
     driveTab: 'recent',
     reuseChat: false,
     timeoutMs: 300000,
+    generationStartTimeoutMs: 30000,
     screenshotDir: path.resolve(process.cwd(), 'output', 'gemini-sequence'),
     metaPath: path.resolve(process.cwd(), 'output', 'gemini-prompt-sequence.json'),
   };
@@ -44,6 +47,8 @@ function parseArgs(argv) {
       options.reuseChat = true;
     } else if (arg === '--timeout-ms' && argv[i + 1]) {
       options.timeoutMs = Number(argv[++i]);
+    } else if (arg === '--generation-start-timeout-ms' && argv[i + 1]) {
+      options.generationStartTimeoutMs = Number(argv[++i]);
     } else if (arg === '--screenshot-dir' && argv[i + 1]) {
       options.screenshotDir = path.resolve(process.cwd(), argv[++i]);
     } else if (arg === '--meta' && argv[i + 1]) {
@@ -81,11 +86,13 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   assertSetupReady(options);
   const prompts = collectPromptEntries(options);
-  const { browser, page } = await openGeminiImageChat(options.cdpUrl, { reuseChat: options.reuseChat });
-
+  let browser;
+  let page;
   try {
+    ({ browser, page } = await openGeminiImageChat(options.cdpUrl, { reuseChat: options.reuseChat }));
     const results = await runPromptSequence(page, prompts, options);
     const meta = {
+      status: 'completed',
       cdpUrl: options.cdpUrl,
       sessionFile: options.sessionFile || null,
       pageUrl: page.url(),
@@ -100,8 +107,65 @@ async function main() {
 
     writeRunMeta(options.metaPath, meta);
     console.log(JSON.stringify(meta, null, 2));
+  } catch (error) {
+    const failureMeta = {
+      status: 'failed',
+      cdpUrl: options.cdpUrl,
+      sessionFile: options.sessionFile || null,
+      pageUrl: page?.url() || null,
+      promptCount: prompts.length,
+      promptFiles: prompts.map((item) => item.file),
+      screenshotDir: options.screenshotDir,
+      failure: {
+        message: error.message,
+        failedAt: new Date().toISOString(),
+      },
+      escalation: null,
+      generatedAt: new Date().toISOString(),
+    };
+    writeRunMeta(options.metaPath, failureMeta);
+    const browserEvidence = error.retryAttempts >= 2
+      ? await captureBrowserEvidence(page, {
+        metaPath: options.metaPath,
+        workflow: 'gemini-image-sequence',
+      }).catch((evidenceError) => ({
+        captureError: evidenceError.message,
+        snapshotPath: null,
+        screenshotPath: null,
+      }))
+      : null;
+    const escalation = error.retryAttempts >= 2
+      ? escalateToCodexCli({
+        workflow: 'gemini-image-sequence',
+        error,
+        cdpUrl: options.cdpUrl,
+        metaPath: options.metaPath,
+        commandArgs: process.argv.slice(1),
+        browserEvidence,
+        additionalDirs: [
+          options.screenshotDir,
+          options.promptDir,
+          ...options.promptFiles.map((file) => path.dirname(file)),
+          path.dirname(options.metaPath),
+        ],
+      })
+      : null;
+    if (escalation?.resolved && escalation.workflowCompleted) {
+      console.log(JSON.stringify({ status: 'completed-by-codex-escalation', escalation }, null, 2));
+      return;
+    }
+    failureMeta.escalation = escalation;
+    failureMeta.browserEvidence = browserEvidence
+      ? {
+        snapshotPath: browserEvidence.snapshotPath || null,
+        screenshotPath: browserEvidence.screenshotPath || null,
+        captureError: browserEvidence.captureError || null,
+      }
+      : null;
+    writeRunMeta(options.metaPath, failureMeta);
+    throw error;
   } finally {
-    await browser.close();
+    await browser?.close();
   }
 }
 

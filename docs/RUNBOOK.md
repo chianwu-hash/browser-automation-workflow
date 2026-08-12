@@ -157,6 +157,7 @@ npm run chatgpt:image-multi-mvp -- -- --cdp-url $env:CDP_URL --prompt-file <prom
 
 Validation:
 
+- Confirm each round records step checks for prompt fill, send acceptance, generation detection, and artifact validation.
 - Check downloaded image files.
 - Check nonzero byte sizes.
 - Check metadata JSON.
@@ -193,6 +194,7 @@ npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir <prompt-
 
 Validation:
 
+- Confirm each result records step checks for prompt fill, send acceptance, generation detection, and artifact validation.
 - Check metadata JSON.
 - Check screenshots.
 - Check generated-image download paths or fallback screenshot paths.
@@ -213,6 +215,7 @@ Recovery:
 | Command lacks `--cdp-url` | Check whether `CDP_URL` is set and `browser:status` sees port 9222 | Initialize browser session and pass explicit `--cdp-url`. |
 | Chinese prompt corrupted | Check whether prompt was passed inline through PowerShell | Move prompt to UTF-8 file and use `--prompt-file` or `--prompt-dir`. |
 | ChatGPT does not enter image mode | Check for `建立圖像`, `創作圖像`, and `picture_v2` chip state | Preserve action chip; rerun once before selector changes. |
+| Prompt is visible but generation wait continues | Check prompt-fill and send-acceptance evidence separately | Require composer clear plus a matching new user message; fail within the short send timeout. |
 | ChatGPT returns too few images | Check mode, prompt shape, `--min-images`, and metadata | Use `--prompt-dir` for exact order; use multi-image probe only as evidence. |
 | Gemini generation succeeds but no download appears | Check screenshots and metadata before declaring failure | Treat as export/download issue; use screenshot fallback or manual download. |
 | Drive picker action misses | Check iframe/picker scope and tab selection | Scope selectors to picker frame and selected Drive tab. |

@@ -53,6 +53,26 @@ If you need a brand or character reference image from Drive, add:
 - Wait for image generation completion before sending the next prompt.
 - Save screenshots and JSON metadata for each run.
 
+### Step verification contract
+
+Every browser-writing step must prove its own success before the next long wait begins:
+
+- session: the selected page is on `gemini.google.com` and login controls are absent
+- new chat: navigation stays on Gemini and the visible prompt textbox exists
+- image mode: the selected image chip or checked image-mode state is visible
+- prompt fill: the visible textbox contains the normalized prompt prefix
+- send: the textbox no longer contains the prompt, a new `user-query` exists, and that query matches the prompt prefix
+- generation start: within 30 seconds, observe the image-specific generating state or a new loaded generated image
+- generation completion: the loaded generated-image count increases from the round baseline and becomes stable
+- export: the downloaded image or screenshot fallback exists, is nonzero, and has a supported image signature
+
+Use a short send-acceptance timeout. If the prompt remains in the textbox, fail immediately; never spend the full generation timeout waiting for a prompt that was not sent.
+Use a separate short generation-start timeout. If the model completes a rejection or no generation indicator appears, fail before the long completion timeout.
+
+The generic stop-response button is not generation-start evidence by itself because ordinary text replies also expose it. Require the image-specific generating state or a new loaded image.
+
+For retryable send or generation-start failures, allow at most two recovery retries. After the second retry fails, capture a browser screenshot plus structured DOM snapshot, then invoke the repo-bundled Codex CLI escalation once with structured output and recursion disabled. The CLI must first classify the incident as transient model failure, UI contract drift, or system failure. A healthy browser should receive one clean fresh-chat image-mode retry before code changes. Continue only if the CLI verifies that the original workflow completed and its artifacts are valid; otherwise report the failure immediately.
+
 ### 4. Use Drive references when needed
 
 - Use the Drive picker helper when the workflow needs a brand image or reference visual.

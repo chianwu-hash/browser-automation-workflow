@@ -15,10 +15,14 @@
     "chatgpt:image-batch": "node scripts/chatgpt-image-batch.js",
     "chatgpt:image-mode-smoke": "node scripts/chatgpt-image-mode-smoke.js",
     "chatgpt:image-multi-mvp": "node scripts/chatgpt-image-multi-mvp.js",
-    "gemini:image-sequence": "node scripts/gemini-image-sequence.js"
+    "gemini:image-sequence": "node scripts/gemini-image-sequence.js",
+    "smoke:step-verification": "node scripts/step-verification-smoke.js"
   },
   "dependencies": {
     "cbs-workflows": "github:chianwu-hash/cbs-workflows",
     "playwright": "^1.59.1"
+  },
+  "devDependencies": {
+    "@openai/codex": "^0.147.0"
   }
 }

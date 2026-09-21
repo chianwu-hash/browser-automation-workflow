@@ -15,13 +15,14 @@ function parseArgs(argv) {
     promptDir: '',
     promptFile: '',
     promptText: '',
+    referenceImages: [],
     count: null,
     minImages: null,
     maxRounds: null,
     reuseChat: false,
-    directPrompt: false,
+    directPrompt: true,
     timeoutMs: 600000,
-    generationStartTimeoutMs: 30000,
+    generationStartTimeoutMs: 120000,
     idleTimeoutMs: 15000,
     pollMs: 3000,
     outputDir: path.resolve(process.cwd(), 'output', 'chatgpt-image-batch'),
@@ -37,6 +38,8 @@ function parseArgs(argv) {
       options.promptFile = path.resolve(process.cwd(), argv[++i]);
     } else if (arg === '--prompt-text' && argv[i + 1]) {
       options.promptText = argv[++i];
+    } else if (arg === '--reference-image' && argv[i + 1]) {
+      options.referenceImages.push(path.resolve(process.cwd(), argv[++i]));
     } else if (arg === '--count' && argv[i + 1]) {
       options.count = Number(argv[++i]);
     } else if (arg === '--min-images' && argv[i + 1]) {
@@ -124,6 +127,8 @@ async function main() {
       pageUrl: page.url(),
       promptDir: options.promptDir || null,
       promptFile: options.promptFile || null,
+      referenceImages: options.referenceImages,
+      generationMode: options.directPrompt ? 'prompt-driven' : 'explicit-image-mode',
       count: result.requestedCount,
       outputDir: options.outputDir,
       result,
@@ -139,9 +144,12 @@ async function main() {
       pageUrl: page?.url() || null,
       promptDir: options.promptDir || null,
       promptFile: options.promptFile || null,
+      referenceImages: options.referenceImages,
+      generationMode: options.directPrompt ? 'prompt-driven' : 'explicit-image-mode',
       outputDir: options.outputDir,
       failure: {
         message: error.message,
+        resubmitSuppressed: Boolean(error.resubmitSuppressed),
         failedAt: new Date().toISOString(),
       },
       escalation: null,

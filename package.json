@@ -14,6 +14,8 @@
     "guided:start": "cbs-guided-start",
     "chatgpt:image-batch": "node scripts/chatgpt-image-batch.js",
     "chatgpt:image-mode-smoke": "node scripts/chatgpt-image-mode-smoke.js",
+    "chatgpt:ui-contract-smoke": "node scripts/chatgpt-ui-contract-smoke.js",
+    "chatgpt:reference-upload-smoke": "node scripts/chatgpt-reference-upload-smoke.js",
     "chatgpt:image-multi-mvp": "node scripts/chatgpt-image-multi-mvp.js",
     "gemini:image-sequence": "node scripts/gemini-image-sequence.js",
     "smoke:prompt-construction": "node scripts/prompt-construction-smoke.js",

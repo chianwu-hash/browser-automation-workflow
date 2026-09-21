@@ -16,6 +16,7 @@ function parseArgs(argv) {
     sessionFile: '',
     promptFile: '',
     promptText: '',
+    referenceImages: [],
     expectedImages: 3,
     allowPartial: true,
     reuseChat: false,
@@ -39,6 +40,8 @@ function parseArgs(argv) {
       options.promptFile = path.resolve(process.cwd(), argv[++i]);
     } else if (arg === '--prompt-text' && argv[i + 1]) {
       options.promptText = argv[++i];
+    } else if (arg === '--reference-image' && argv[i + 1]) {
+      options.referenceImages.push(path.resolve(process.cwd(), argv[++i]));
     } else if (arg === '--expected-images' && argv[i + 1]) {
       options.expectedImages = Number(argv[++i]);
     } else if (arg === '--strict') {
@@ -115,6 +118,7 @@ async function main() {
 
   try {
     const baseline = new Set((await getGeneratedImages(page)).map((item) => item.id || item.src));
+    const referenceUpload = await require('../lib/chatgpt/image-batch').uploadReferenceImages(page, options.referenceImages);
     await fillPrompt(page, prompt);
     await page.waitForTimeout(500);
     const sendCheck = await clickSend(page, prompt);
@@ -144,6 +148,9 @@ async function main() {
       sessionFile: options.sessionFile || null,
       pageUrl: page.url(),
       promptFile: options.promptFile || null,
+      generationMode: options.directPrompt ? 'prompt-driven' : 'explicit-image-mode',
+      referenceImages: options.referenceImages,
+      referenceUpload,
       expectedImages: options.expectedImages,
       detectedNewImages: freshImages.length,
       downloadedCount: downloadResult.downloads.length,

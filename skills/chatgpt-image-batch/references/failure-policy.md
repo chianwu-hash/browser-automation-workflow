@@ -16,11 +16,17 @@ Use these rules when the ChatGPT image workflow fails.
 - After the operator says they are logged in, rerun the same workflow with the same CDP URL.
 - Treat this as a session boundary, not as selector drift or image-mode failure.
 
-## Cannot Enter Image Mode
+## Wrong Experience Mode
 
-- Check whether the current UI exposes `建立圖像` or the `創作圖像` action state.
-- Preserve the action chip when filling the prompt; clearing the whole composer can remove image mode.
-- Try one rerun before changing selectors, because ChatGPT web can transiently hang after send.
+- If the page exposes Chat/Work toggles, require the Chat toggle to be selected before filling or sending.
+- Do not treat a visible composer in Work mode as a valid ChatGPT image session.
+- If the toggle cannot be moved to Chat mode and verified through `aria-checked="true"`, stop before filling the prompt.
+
+## Cannot Enter the Images Action
+
+- Prompt-driven generation in Chat mode is the production fallback and does not require opening the composer menu.
+- Treat `--image-mode` as an explicit compatibility probe. If the Images action cannot be selected and verified, fail that probe without blocking ordinary prompt-driven generation.
+- Current composer menus may render `創作圖像` as a focusable `div.__menu-item[tabindex="0"]` without `role="menuitem"`; do not assume button semantics.
 
 ## Too Few Images
 
@@ -40,9 +46,18 @@ Use these rules when the ChatGPT image workflow fails.
 - Treat the prompt file as authoritative for output type, brand identity, mascot prominence, and overlay placement. The generic runner must not silently inject project-specific rules.
 - If the prompt mentions Dingxi mascots or brand assets, inspect outputs for anatomy, identity, and fake-logo errors before use.
 
+## Reference Upload Issues
+
+- Pass each reference through a repeated `--reference-image` argument; do not encode binary files into prompt text.
+- Verify that every source path exists and is nonzero before browser interaction.
+- Upload through the active unified composer (`form[data-type="unified-composer"] input#upload-files`), never the page-level Images-library input (`upload-photos-input`). After upload, require the expected preview-image count or per-file `aria-label` removal controls in that composer before sending. React may clear `input.files` after acceptance.
+- If ChatGPT asks for a reference that the request depends on, do not keep retrying the same text-only prompt. Attach the required reference or stop and report the missing asset.
+- When a separate brand skill governs the reference, follow its asset routing and upload boundaries before this workflow.
+
 ## Send not accepted
 
 - A visible, enabled send button is not proof that a prompt was sent.
+- Prefer a focused-composer Enter key event, then fall back to a DOM button activation. The current UI can expose a visible button while pointer hit-testing is intercepted by the document root.
 - Require all three signals: the prompt leaves the visible composer, a new user message is added, and the new message matches the prompt prefix.
 - If those signals do not appear within the short send timeout, stop before generation waiting begins.
 - Record failed-run metadata with the page URL, failed step, and error message; do not record prompt contents or session secrets.
@@ -50,7 +65,7 @@ Use these rules when the ChatGPT image workflow fails.
 ## Generation did not start
 
 - Send acceptance and image-generation start are separate states.
-- Within 30 seconds after send acceptance, require image-specific generating text in the latest assistant turn or a new generated-image ID. A generic stop-response button is not sufficient.
+- After send acceptance, image-specific generating text, the page-level renderer progress card, or a new generated-image ID confirms image generation. `正在思考`/`思考中` with a percentage or an active stop control means the accepted request is still processing; keep waiting even though it does not yet prove image-tool start.
 - Current Traditional Chinese generating text can use `正在建立圖像`, `正在生成圖像`, or `正在產生...圖片`; treat these as equivalent image-specific start evidence.
 - If a new assistant message instead reports that image creation failed, requires a reference image, or was misclassified as editing, stop immediately.
 - Do not consume the full generation-completion timeout when no generation-start evidence exists.
@@ -61,7 +76,7 @@ Safe retries:
 
 - reconnect to CDP
 - start a fresh ChatGPT chat
-- re-enter image mode
+- re-confirm Chat mode
 - rerun the same prompt once after a web-side hang
 
-Do not auto-retry indefinitely. Use at most two recovery retries. If the same checked step still fails, capture a screenshot and DOM snapshot, then invoke the bundled Codex CLI escalation once. The CLI gets 60 seconds to classify transient model failure, UI contract drift, or system failure; when the browser is healthy it should prefer one fresh-chat image-mode rerun over exploratory code changes. If the CLI is unavailable, cannot diagnose the state, or cannot verify completed artifacts within the bounded escalation, write failed-run metadata and return an error. Keep metadata and downloaded artifacts from failing attempts.
+Never resend after send acceptance has been verified. A server-side image job can survive page-side selector drift or navigation, so starting a fresh chat at that point can create duplicate generations. Recovery retries are allowed only before acceptance. After an accepted request times out or becomes ambiguous, capture evidence, preserve any artifacts, write failed-run metadata with `resubmitSuppressed: true`, and stop for inspection.

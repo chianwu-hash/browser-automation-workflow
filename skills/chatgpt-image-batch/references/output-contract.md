@@ -18,6 +18,7 @@ Metadata should include:
 - `sessionFile` or `null`
 - `pageUrl`
 - `promptDir` or `promptFile`
+- `referenceImages[]` when supplied
 - `count`
 - `outputDir`
 - `result.downloadedCount`
@@ -35,6 +36,12 @@ Each `downloads[]` item should include:
 - `id`
 
 Each completed round should include machine-readable `checks` for prompt fill, send acceptance, generation detection, and artifact validation. Failed runs should still write metadata containing the failed step's error message and timestamp.
+
+When a failure occurs after verified send acceptance, record `resubmitSuppressed: true` and do not create a new chat or resend the prompt automatically.
+
+When references are supplied, metadata should also include `result.referenceUpload` with the requested and uploaded counts plus attachment evidence. Do not record binary image data in metadata.
+
+When the current Chat/Work experience toggle is present, session verification must also prove that Chat mode was selected before prompt submission. An image-mode chip is evidence only for explicit `--image-mode` probes; it is not required for production prompt-driven image generation.
 
 When Codex CLI escalation runs, preserve a sanitized brief, browser screenshot, structured DOM snapshot, JSONL event log, structured result, and an `escalation` metadata object. Never include prompt contents, cookies, tokens, or login state in the brief or structured result.
 

@@ -1,6 +1,6 @@
 # Project Memory
 
-Last reviewed: 2026-08-12
+Last reviewed: 2026-09-30
 
 ## Project identity
 
@@ -39,7 +39,7 @@ browser-automation-workflow
 
 This repository calls CBS-facing commands and consumes either:
 
-- an explicit local `--cdp-url`, normally `http://127.0.0.1:9222`, or
+- an explicit local `--cdp-url`, normally `http://127.0.0.1:9232`, or
 - a CBS-generated local session config.
 
 The top-level workflow should not require machine-global CDP commands or PATH changes. CBS owns guided session setup and delegates browser discovery, profiles, ports, launch, and status checks to `cdp-tools`.
@@ -154,13 +154,13 @@ Reason:
 
 ### 2026-08-08 Use repo-owned CBS entry points for browser setup
 
-Status: active
+Status: superseded by the shared-launcher-first procedure in `docs/RUNBOOK.md` when a machine has one configured; the CBS entry point remains the portable fallback
 Scope: browser session setup
 Source: README, `docs/browser-automation-workflow.md`, `docs/modules.md`
 
 Decision:
 
-- Use `npm run browser:init` and `npm run browser:status` from this repo.
+- Use `npm run browser:init` and `npm run browser:status` from this repo on machines without a configured shared launcher.
 - Do not require global `cdp-tools` binaries or machine PATH changes.
 - Treat `cbs-workflows` as the direct session-setup dependency and `cdp-tools` as its transitive lower-level dependency.
 
@@ -212,7 +212,7 @@ Reason:
 | Surface | Purpose | Where configured | Secret policy |
 |---|---|---|---|
 | Logged-in browser profile | Reuse human login state for ChatGPT/Gemini workflows | Local browser profile managed through CBS / CDP setup | Do not store cookies, profile data, or full session config contents in memory or chat. |
-| CDP endpoint | Connect Playwright to the work browser | Usually `http://127.0.0.1:9222` during local runs | Local endpoint only; do not expose externally unless explicitly authorized. |
+| CDP endpoint | Connect Playwright to the work browser | Usually `http://127.0.0.1:9232` during local runs | Local endpoint only; do not expose externally unless explicitly authorized. |
 | ChatGPT web | Browser-based image generation | Existing logged-in browser session | Do not automate login or capture credentials. |
 | Gemini web | Browser-based image generation and optional Drive references | Existing logged-in browser session | Do not automate login or capture credentials. |
 | Google Drive picker | Optional reference image insertion for Gemini | Existing logged-in browser session | Do not store private Drive URLs, file contents, or access tokens in memory. |
@@ -221,7 +221,7 @@ Reason:
 
 | Issue | Root cause | Fix or first response | Last verified |
 |---|---|---|---|
-| Missing CDP URL | Browser session not initialized or endpoint not passed | Run `npm run browser:init`, confirm with `npm run browser:status`, pass `--cdp-url` explicitly | 2026-08-08 docs |
+| Missing CDP URL | Browser session not initialized or endpoint not passed | Confirm the configured shared launcher when available; otherwise run `npm run browser:init`. Confirm with `npm run browser:status` and pass `--cdp-url` explicitly. | 2026-09-30 docs |
 | Chinese prompt mojibake | Inline PowerShell / nested shell encoding | Move prompt to UTF-8 `.txt` and use `--prompt-file` or `--prompt-dir` | 2026-08-08 docs |
 | ChatGPT image mode lost | Clearing composer removes the image action chip | Preserve image action state; rerun once before changing selectors | 2026-07-03 / 2026-07-15 notes |
 | Too few ChatGPT images | ChatGPT web behavior varies by mode/UI | For exact order use `--prompt-dir`; use multi-image probe only as current behavior evidence | 2026-05-27 / 2026-07-15 notes |

@@ -65,11 +65,16 @@ Install the bundled Codex skills:
 npm run skills:install
 ```
 
-If the skills are already installed and you want to update them from this repo, run:
+If the skills are already installed as ordinary directories and you want to
+replace them from this repo, run:
 
 ```powershell
 npm run skills:install:force
 ```
+
+The force installer refuses to replace a symlink or Windows junction. If an
+installed skill is linked to a skill vault, update the source directory through
+that vault's normal workflow instead.
 
 Restart Codex after installing or updating skills.
 
@@ -84,7 +89,7 @@ ai-browser-launch -Status
 Otherwise, use the repo-owned CBS entry point, then confirm the CDP endpoint:
 
 ```powershell
-npm run browser:init -- -- --app chatgpt --browser chrome --port 9232 --yes
+npm run browser:init -- --app chatgpt --browser chrome --port 9232 --yes
 npm run browser:status -- --ports 9232
 $env:CDP_URL = "http://127.0.0.1:9232"
 ```
@@ -107,7 +112,7 @@ npm run check
 Run ChatGPT image batch generation:
 
 ```powershell
-npm run chatgpt:image-batch -- -- --cdp-url $env:CDP_URL --prompt-file templates\prompt-example.txt
+npm run chatgpt:image-batch -- --cdp-url $env:CDP_URL --prompt-file templates\prompt-example.txt
 ```
 
 The prompt example is intentionally pure prompt text. Keep workflow notes in docs, not inside prompt files that will be sent to AI tools.
@@ -115,15 +120,21 @@ The prompt example is intentionally pure prompt text. Keep workflow notes in doc
 Run Gemini image sequencing:
 
 ```powershell
-npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir templates\gemini-sequence
+npm run gemini:image-sequence -- --cdp-url $env:CDP_URL --prompt-dir templates\gemini-sequence
 ```
 
 Recommended order:
 
-1. open the AI work browser with `ai-browser-launch`, or run `npm run browser:init -- -- --app chatgpt --browser chrome --port 9232 --yes`
+1. open the AI work browser with `ai-browser-launch`, or run `npm run browser:init -- --app chatgpt --browser chrome --port 9232 --yes`
 2. log in to the sites needed by the workflow, such as ChatGPT and Gemini
 3. confirm the endpoint with `npm run browser:status -- --ports 9232`
 4. pass `--cdp-url $env:CDP_URL` to the workflow command
+
+Before browser workflows that require downloads or extensions, confirm the
+active browser uses the expected persistent profile. Verify that its download
+directory is the current user's Downloads folder, downloads are permitted, and
+extensions are enabled. A successful status check alone does not verify these
+settings. See [the runbook](docs/RUNBOOK.md#verify-downloads-and-extensions).
 
 ## Design Principles
 

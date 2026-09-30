@@ -26,7 +26,7 @@ ai-browser-launch -Status
 Otherwise, use the repo setup path:
 
 ```powershell
-npm run browser:init -- -- --app chatgpt --browser chrome --port 9232 --yes
+npm run browser:init -- --app chatgpt --browser chrome --port 9232 --yes
 npm run browser:status -- --ports 9232
 $env:CDP_URL = "http://127.0.0.1:9232"
 ```

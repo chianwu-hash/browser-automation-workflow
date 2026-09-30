@@ -4,6 +4,20 @@ This file records dated changes that future AI assistants and maintainers may ne
 
 Do not record secrets, cookies, tokens, full session configs, private browser profile data, sensitive screenshot contents, or account credentials.
 
+## 2026-09-30 — Align browser setup docs and protect linked skill installs
+
+Changed:
+
+- Updated the portable browser examples to the repo's current port `9232` and corrected npm argument forwarding.
+- Documented checks for the active browser's download location, download behavior, and extension availability.
+- Made the force skill installer reject symlink and Windows junction destinations, preserving skill-vault links.
+- Kept machine-specific profile paths and routing outside the repository.
+
+Validation:
+
+- `npm run check`
+- Confirmed a forced update of the linked installed skill stops with a clear error and leaves the junction intact.
+
 ## 2026-08-12 — Remove product-specific prompt injection from the generic ChatGPT runner
 
 Changed:

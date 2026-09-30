@@ -1,6 +1,6 @@
 # Project Runbook
 
-Last reviewed: 2026-08-08
+Last reviewed: 2026-09-30
 Owner: project maintainers and authorized AI assistants
 
 ## Scope
@@ -31,7 +31,7 @@ It does not cover product-specific content, final slide composition, account log
 |---|---|---|---|
 | Local repo | Workflow source, scripts, and bundled skills | `D:\projects\browser-automation-workflow` | Check Git status before changes. |
 | Node.js dependencies | Playwright, CBS workflow helpers | `package.json`, `package-lock.json` | Use repo scripts; avoid hidden global CDP assumptions. |
-| AI work browser | Logged-in browser session for ChatGPT/Gemini | CBS / CDP setup, normally port `9222` | Login is manual; profile/session contents are sensitive. |
+| AI work browser | Logged-in browser session for ChatGPT/Gemini | Shared launcher when configured; otherwise CBS / CDP setup, normally port `9232` | Login is manual; profile/session contents are sensitive. |
 | ChatGPT web | Browser-based image generation | Existing logged-in work browser | Do not automate credentials. |
 | Gemini web | Browser-based image generation and Drive references | Existing logged-in work browser | Generation and download success are separate. |
 | Google Drive picker | Optional reference image insertion | Gemini browser workflow | Do not store private Drive URLs or access tokens. |
@@ -68,12 +68,13 @@ Purpose: make this repo's browser workflow skills available to Codex.
 Steps:
 
 1. Run `npm run skills:install`.
-2. If replacing existing installed copies is intentional, run `npm run skills:install:force`.
+2. If replacing ordinary installed directories is intentional, run `npm run skills:install:force`. The installer refuses to replace linked directories or Windows junctions; update their source directories instead.
 3. Restart Codex after installation or update.
 
 Validation:
 
 - The installed skill names are available in Codex:
+  - `ai-work-browser`
   - `chatgpt-image-batch`
   - `gemini-image-workflow`
 
@@ -87,25 +88,45 @@ Purpose: expose an already logged-in browser to Playwright through CDP.
 
 Steps:
 
-1. From this repo, run one of:
-   - `npm run browser:init -- -- --app chatgpt --browser chrome --port 9222 --yes`
-   - `npm run browser:init -- -- --app gemini --browser chrome --port 9222 --yes`
+1. If the machine has a configured `ai-browser-launch`, run `ai-browser-launch` and `ai-browser-launch -Status`. Otherwise, from this repo run one of:
+   - `npm run browser:init -- --app chatgpt --browser chrome --port 9232 --yes`
+   - `npm run browser:init -- --app gemini --browser chrome --port 9232 --yes`
 2. Ask the operator to log in manually if needed.
 3. Confirm the endpoint:
-   - `npm run browser:status -- --ports 9222`
+   - `npm run browser:status -- --ports 9232`
 4. Set the local session variable in the current shell:
-   - `$env:CDP_URL = "http://127.0.0.1:9222"`
+   - `$env:CDP_URL = "http://127.0.0.1:9232"`
 
 Validation:
 
 - `browser:status` reports the selected port.
 - Playwright can connect through CDP.
 - The relevant site is open and logged in in the browser tied to that port.
+- Download and extension settings pass the checks below when the workflow needs them.
 
 Escalation:
 
 - Stop if the browser is not under the expected local port.
 - Stop if login or account verification is required; the operator must handle it.
+
+### Verify downloads and extensions
+
+Purpose: ensure the active persistent browser can save files to the current user's Downloads folder and permits extensions.
+
+Steps:
+
+1. Confirm the active browser and profile with `ai-browser-launch -Status -Json` when the shared launcher is configured. On other machines, inspect the profile reported by `browser:status`. Do not create another profile just to change these settings.
+2. In that browser, open `chrome://settings/downloads`. Check that the download location is the user's Downloads folder and that downloads are allowed. Decide whether the “ask where to save each file” setting suits the workflow; unattended downloads require it off.
+3. Open `chrome://extensions` and `chrome://policy`. Confirm extensions are enabled and no install-blocking policy applies. If an extension is actually needed, verify its install button is available before running that workflow.
+4. For a download-dependent workflow, download a harmless test file and confirm that it appears in the expected Downloads folder. Remove the test file afterward.
+
+Validation:
+
+- The checked profile is the profile used by the workflow's CDP endpoint.
+- The test download lands in the user's Downloads folder without a blocking prompt.
+- Extension installation is available in the active browser; no extension needs to be installed solely for this check.
+
+If any check fails, fix the local launcher or Chrome profile settings and repeat the check before running the dependent workflow. Keep machine-specific paths and profile routing outside this repo.
 
 ### Run repository checks
 
@@ -116,7 +137,7 @@ Steps:
 1. Run `npm run check`.
 2. If scripts changed, run the relevant smoke test:
    - `npm run browser:smoke`
-   - `npm run chatgpt:image-mode-smoke -- --cdp-url http://127.0.0.1:9222 --trials 3`
+   - `npm run chatgpt:image-mode-smoke -- --cdp-url http://127.0.0.1:9232 --trials 3`
 
 Validation:
 
@@ -141,19 +162,19 @@ Prerequisites:
 Recommended deck mode:
 
 ```powershell
-npm run chatgpt:image-batch -- -- --cdp-url $env:CDP_URL --prompt-dir <prompt-dir> --output-dir <output-dir> --output-prefix <prefix> --meta <output-dir>\run-meta.json
+npm run chatgpt:image-batch -- --cdp-url $env:CDP_URL --prompt-dir <prompt-dir> --output-dir <output-dir> --output-prefix <prefix> --meta <output-dir>\run-meta.json
 ```
 
 Recommended variant mode:
 
 ```powershell
-npm run chatgpt:image-batch -- -- --cdp-url $env:CDP_URL --prompt-file <prompt-file> --count <n> --output-dir <output-dir> --output-prefix <prefix> --meta <output-dir>\run-meta.json
+npm run chatgpt:image-batch -- --cdp-url $env:CDP_URL --prompt-file <prompt-file> --count <n> --output-dir <output-dir> --output-prefix <prefix> --meta <output-dir>\run-meta.json
 ```
 
 Multi-image probe only:
 
 ```powershell
-npm run chatgpt:image-multi-mvp -- -- --cdp-url $env:CDP_URL --prompt-file <prompt-file> --expected-images <n> --output-dir <output-dir> --output-prefix <prefix> --meta <output-dir>\run-meta.json
+npm run chatgpt:image-multi-mvp -- --cdp-url $env:CDP_URL --prompt-file <prompt-file> --expected-images <n> --output-dir <output-dir> --output-prefix <prefix> --meta <output-dir>\run-meta.json
 ```
 
 Validation:
@@ -184,13 +205,13 @@ Prerequisites:
 Recommended command:
 
 ```powershell
-npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir <prompt-dir> --output-dir <output-dir>
+npm run gemini:image-sequence -- --cdp-url $env:CDP_URL --prompt-dir <prompt-dir> --output-dir <output-dir>
 ```
 
 With Drive reference:
 
 ```powershell
-npm run gemini:image-sequence -- -- --cdp-url $env:CDP_URL --prompt-dir <prompt-dir> --output-dir <output-dir> --drive-filename "<file>" --drive-tab starred
+npm run gemini:image-sequence -- --cdp-url $env:CDP_URL --prompt-dir <prompt-dir> --output-dir <output-dir> --drive-filename "<file>" --drive-tab starred
 ```
 
 Validation:
@@ -213,7 +234,7 @@ Recovery:
 
 | Symptom | First checks | Confirmed fix or next action |
 |---|---|---|
-| Command lacks `--cdp-url` | Check whether `CDP_URL` is set and `browser:status` sees port 9222 | Initialize browser session and pass explicit `--cdp-url`. |
+| Command lacks `--cdp-url` | Check whether `CDP_URL` is set and `browser:status` sees port 9232 | Confirm the browser session and pass explicit `--cdp-url`. |
 | Chinese prompt corrupted | Check whether prompt was passed inline through PowerShell | Move prompt to UTF-8 file and use `--prompt-file` or `--prompt-dir`. |
 | ChatGPT does not enter image mode | Check for `建立圖像`, `創作圖像`, and `picture_v2` chip state | Preserve action chip; rerun once before selector changes. |
 | Prompt is visible but generation wait continues | Check prompt-fill and send-acceptance evidence separately | Require composer clear plus a matching new user message; fail within the short send timeout. |

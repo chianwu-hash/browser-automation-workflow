@@ -63,10 +63,20 @@ function installSkill(name, options) {
     throw new Error(`Skill destination resolved outside destination root: ${resolvedDest}`);
   }
 
-  if (fs.existsSync(resolvedDest)) {
+  let destination;
+  try {
+    destination = fs.lstatSync(resolvedDest);
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+
+  if (destination) {
     if (!options.force) {
       console.log(`[skip] ${name} already exists at ${resolvedDest}. Use --force to update it.`);
       return { name, status: 'skipped', dest: resolvedDest };
+    }
+    if (destination.isSymbolicLink()) {
+      throw new Error(`Refusing to replace linked skill destination: ${resolvedDest}. Update its source directory directly.`);
     }
     fs.rmSync(resolvedDest, { recursive: true, force: true });
   }

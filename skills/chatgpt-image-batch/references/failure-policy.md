@@ -5,7 +5,7 @@ Use these rules when the ChatGPT image workflow fails.
 ## Missing CDP URL
 
 - Stop immediately.
-- Tell the operator to run `npm run browser:init -- -- --app chatgpt --browser chrome --port 9232 --yes`, confirm with `npm run browser:status -- --ports 9232`, and pass `--cdp-url http://127.0.0.1:9232`.
+- Use a configured `ai-browser-launch` when available. Otherwise run `npm run browser:init -- --app chatgpt --browser chrome --port 9232 --yes`. Confirm with `npm run browser:status -- --ports 9232` and pass `--cdp-url http://127.0.0.1:9232`.
 - If the project uses legacy session files, ask for `--session-file <file>` instead.
 - Do not silently assume the browser is already running.
 
@@ -22,10 +22,16 @@ Use these rules when the ChatGPT image workflow fails.
 - Do not treat a visible composer in Work mode as a valid ChatGPT image session.
 - If the toggle cannot be moved to Chat mode and verified through `aria-checked="true"`, stop before filling the prompt.
 
+## Shared Browser Busy or Conversation Drift
+
+- If another ChatGPT workflow already owns the shared browser, stop before navigating or submitting. Wait for that workflow to finish.
+- If the latest visible user message no longer matches the accepted prompt while waiting, stop without resubmitting. ChatGPT may change the conversation URL during normal creation, so do not treat the URL change alone as drift. Do not download or credit images from another conversation.
+- Preserve a downloaded but misattributed artifact as failure evidence only; mark its metadata `failed`.
+
 ## Cannot Enter the Images Action
 
-- Prompt-driven generation in Chat mode is the production fallback and does not require opening the composer menu.
-- Treat `--image-mode` as an explicit compatibility probe. If the Images action cannot be selected and verified, fail that probe without blocking ordinary prompt-driven generation.
+- The verified Images action is the default. If it cannot be selected and verified, stop before sending; do not silently fall back to prompt-driven generation.
+- Use `--direct-prompt` only for an intentional compatibility probe after deciding that its different routing is acceptable.
 - Current composer menus may render `創作圖像` as a focusable `div.__menu-item[tabindex="0"]` without `role="menuitem"`; do not assume button semantics.
 
 ## Too Few Images
@@ -37,6 +43,8 @@ Use these rules when the ChatGPT image workflow fails.
 ## Download Issues
 
 - Generated ChatGPT images are normally downloaded from `/backend-api/estuary/content?id=file_...` URLs with page credentials.
+- The current UI may instead place a valid PNG/JPEG/WebP in an assistant file card with a `下載檔案` button. The preview button can intercept pointer clicks; activate the card's download button directly, then verify the downloaded image signature and bytes.
+- If the same response also says `圖像生成失敗`, mark the run failed and preserve the validated file and partial result in failure metadata. The image is usable evidence, but the failure message prevents a success claim.
 - If the DOM contract changes, inspect generated image containers before adding UI-click download logic.
 - Deduplicate by image ID and content hash.
 

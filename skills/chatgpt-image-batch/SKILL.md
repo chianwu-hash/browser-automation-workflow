@@ -1,6 +1,6 @@
 ---
 name: chatgpt-image-batch
-description: Run ChatGPT work-browser image generation through an already logged-in CDP session. Use when the user asks to generate images with the ChatGPT work browser instead of built-in imagegen. Handles the current Chat/Work experience toggle, prompt-driven generation, batch variants, and validated image downloads.
+description: Run ChatGPT work-browser image generation through an already logged-in CDP session. Use when the user asks to generate images with the ChatGPT work browser instead of built-in imagegen. Handles the current Chat/Work experience toggle, verified Images action, batch variants, and validated image downloads.
 ---
 
 # ChatGPT Image Batch
@@ -13,8 +13,9 @@ Use this skill when the task is to operate ChatGPT web image generation through 
 2. Use `http://127.0.0.1:9232` as the default CDP URL.
 3. Log in to ChatGPT in that browser if needed; the user must do login manually.
 4. Prefer UTF-8 prompt files over inline prompt text, especially for Chinese prompts.
-5. Current production runs use prompt-driven generation in **Chat** mode. The workflow must not remain in **Work** mode.
+5. Current production runs verify the **製作圖像** action in **Chat** mode before sending. The workflow must not remain in **Work** mode.
 6. When the image depends on a supplied style, character, product, or brand reference, pass each local image with a repeated `--reference-image` argument. Verify attachment evidence before sending.
+7. Run only one ChatGPT browser workflow at a time against the shared profile. The CLI reserves the browser and rejects another active workflow before navigation. If it reports a conflicting PID, wait for that job to finish; do not bypass the guard.
 
 To trigger this skill reliably, include `ChatGPT 工作瀏覽器` or `工作瀏覽器` in the request, for example:
 
@@ -25,25 +26,25 @@ To trigger this skill reliably, include `ChatGPT 工作瀏覽器` or `工作瀏�
 Run one image per prompt file:
 
 ```powershell
-npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9232 --prompt-dir <dir> --output-dir <out>
+npm run chatgpt:image-batch -- --cdp-url http://127.0.0.1:9232 --prompt-dir <dir> --output-dir <out>
 ```
 
 Run same-brief variants from one prompt file:
 
 ```powershell
-npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --count 4 --output-dir <out>
+npm run chatgpt:image-batch -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --count 4 --output-dir <out>
 ```
 
 Run with one or more reference images:
 
 ```powershell
-npm run chatgpt:image-batch -- -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --reference-image <style.png> --reference-image <character.png> --count 1 --output-dir <out>
+npm run chatgpt:image-batch -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --reference-image <style.png> --reference-image <character.png> --count 1 --output-dir <out>
 ```
 
 Probe a single response for multiple images:
 
 ```powershell
-npm run chatgpt:image-multi-mvp -- -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --expected-images 3 --output-dir <out>
+npm run chatgpt:image-multi-mvp -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --expected-images 3 --output-dir <out>
 ```
 
 ## Core Workflow
@@ -54,8 +55,8 @@ npm run chatgpt:image-multi-mvp -- -- --cdp-url http://127.0.0.1:9232 --prompt-f
 - If no `ai-work-browser` launcher is available, use the repo's CBS initializer: `npm run browser:init -- --app chatgpt --browser chrome --port 9232 --yes`.
 - Prefer an explicit `--cdp-url`, normally `http://127.0.0.1:9232`.
 - Confirm ChatGPT is logged in before running the workflow.
-- Run `npm run chatgpt:ui-contract-smoke -- -- --cdp-url http://127.0.0.1:9232` after a ChatGPT UI update or when mode selection/send behavior drifts. This check does not submit a prompt.
-- Run `npm run chatgpt:reference-upload-smoke -- -- --cdp-url http://127.0.0.1:9232 --reference-image <file>` when attachment behavior drifts. It uploads to a fresh composer without sending and reports thumbnail/removal-control evidence.
+- Run `npm run chatgpt:ui-contract-smoke -- --cdp-url http://127.0.0.1:9232` after a ChatGPT UI update or when mode selection/send behavior drifts. This check does not submit a prompt.
+- Run `npm run chatgpt:reference-upload-smoke -- --cdp-url http://127.0.0.1:9232 --reference-image <file>` when attachment behavior drifts. It uploads to a fresh composer without sending and reports thumbnail/removal-control evidence.
 - When the page exposes the `Chat` / `Work` experience toggle, require `[data-tpp-toggle-value="chatgpt"]` to have `aria-checked="true"` before filling or sending a prompt.
 
 ### 2. Choose the mode
@@ -63,16 +64,17 @@ npm run chatgpt:image-multi-mvp -- -- --cdp-url http://127.0.0.1:9232 --prompt-f
 - Use `chatgpt:image-batch` with `--prompt-dir` when prompt order matters, such as slide or card sequences.
 - Use `chatgpt:image-batch` with `--prompt-file --count <n>` for variants of one brief.
 - Use `chatgpt:image-multi-mvp` only to test whether the current ChatGPT UI can return several generated images from one assistant response.
-- Prompt-driven image generation in Chat mode is the production default because ChatGPT officially supports creating an image by describing it directly in a conversation.
-- Use `--image-mode` only as an explicit compatibility probe when the current UI exposes and verifies a stable Images action state. Do not make the composer-menu action a production prerequisite.
+- The verified **製作圖像** action is the default for image runs. On the 2026-09-30 UI, open `新增檔案和更多內容`, choose `製作圖像`, and verify the selected chip has `aria-label="移除 製作圖像"`. Run the no-send `chatgpt:image-mode-smoke` after a UI change; if the action cannot be verified, stop before sending.
+- Use `--direct-prompt` only when intentionally probing prompt-driven image generation. Do not silently switch modes after an action-selection failure.
 
 ### 3. Run generation
 
 - Keep prompt files as UTF-8 `.txt`.
 - Put all output-specific layout, brand, mascot, text, and overlay requirements in the prompt files. The generic runner does not inject product-specific rules or fixed sizing/corner assumptions.
 - Let the workflow start a fresh chat unless `--reuse-chat` is intentional.
-- Let the workflow enforce Chat mode and send the explicit image-generation prompt directly. `--direct-prompt` is retained as a compatibility flag but is now the default behavior.
-- Upload reference images through the active `form[data-type="unified-composer"] input#upload-files`, not the page-level `upload-photos-input` used by the Images library. Treat the upload as successful only when the composer exposes the expected preview images or per-file `aria-label` removal controls; React may clear `input.files` after accepting the upload, so do not infer failure from an empty native file list.
+- ChatGPT may clear the selected Images action after a response; verify and reselect it before each batch prompt.
+- Let the workflow enforce Chat mode and the Images action before sending the explicit image-generation prompt. `--image-mode` remains an optional alias for the default.
+- Upload reference images through the active `form[data-type="unified-composer"]` or `form[data-chatgpt-composer]` file input, not a page-level Images-library input. Treat the upload as successful only when the composer exposes the expected preview images or per-file `aria-label` removal controls; React may clear `input.files` after accepting the upload, so do not infer failure from an empty native file list.
 - Expect ChatGPT web behavior to vary by model/mode and rerun once before changing selectors.
 
 ### Step verification contract
@@ -82,13 +84,14 @@ Every browser-writing step must prove its own success before the next long wait 
 - session: CDP page is on `chatgpt.com` and login controls are absent
 - new chat: the visible composer exists after navigation
 - experience mode: if the Chat/Work toggle exists, Chat is visibly selected and Work is not selected
-- image request: the normalized prompt explicitly requests a new image; an image action chip is required only when `--image-mode` was explicitly requested
+- image request: the normalized prompt explicitly requests a new image; the image action chip is required unless `--direct-prompt` was explicitly requested
 - prompt fill: the visible composer contains the normalized prompt prefix
 - references: when requested, every local reference file exists, is nonzero, and has corresponding attachment evidence in the composer
 - send: the composer no longer contains the prompt, a new user message exists, and that message matches the prompt prefix
+- conversation identity: while waiting and before downloading, the latest visible user message must match this request. ChatGPT may replace a provisional conversation URL with its permanent URL during the same request, so a URL change alone is not failure. If another job changes the latest user message, stop and mark the result failed; never attribute its image to this run
 - generation start: observe image-specific generating text in the assistant turn or the page-level image progress card (currently including `正在產生更細緻的圖片` / `圖像生成時玩貪食蛇`), or a new generated-image ID
-- generation completion: at least one new generated-image ID appears after the round baseline and becomes stable
-- download: the file exists, is nonzero, has a supported image signature, and its written byte count matches
+- generation completion: at least one new generated-image node or assistant PNG/JPEG/WebP file card appears after the round baseline and becomes stable
+- download: the file exists, is nonzero, has a supported image signature, and its written byte count matches. If the assistant also reports `圖像生成失敗`, stop the batch before the next prompt, mark the run failed, and preserve the artifact and partial result in failure metadata.
 
 Use a short send-acceptance timeout. If the prompt remains in the composer, fail immediately; never spend the full generation timeout waiting for a prompt that was not sent.
 Use a separate generation-start timeout, but treat `正在思考`/`思考中` with a percentage, the active stop control, or the page-level image progress card as evidence that the accepted request is still processing. While any of these signals remains, keep waiting and never resend.
@@ -109,12 +112,12 @@ Enforce a single-submit invariant: after the workflow proves that the composer c
 This skill is for:
 
 - ChatGPT browser session reuse
-- Chat/Work experience selection and prompt-driven image requests
+- Chat/Work experience selection and verified Images action requests
 - optional image-action compatibility probing
 - local reference-image upload with pre-send attachment verification
 - prompt-file based image batches
 - single-response multi-image probing
-- generated image DOM detection and estuary URL download
+- generated image DOM detection and estuary URL download, with assistant file-card download fallback
 - JSON metadata and output artifact validation
 
 This skill is not for:

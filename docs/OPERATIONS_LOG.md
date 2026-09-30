@@ -4,6 +4,39 @@ This file records dated changes that future AI assistants and maintainers may ne
 
 Do not record secrets, cookies, tokens, full session configs, private browser profile data, sensitive screenshot contents, or account credentials.
 
+## 2026-09-30 — Verify image mode and isolate ChatGPT image batches
+
+Changed:
+
+- Made the verified `製作圖像` action the default, and reselect it before each batch prompt because the chip disappears after a response.
+- Stopped a batch immediately when a round reports image-generation failure, retaining the partial result.
+- Added a shared-browser lease and a preflight check for already-running ChatGPT image jobs.
+- Rejected images when the latest user message no longer matches the accepted prompt. A URL change alone is allowed because ChatGPT may assign a permanent conversation URL after send.
+- Updated the skill, failure policy, output contract, and escalation guidance.
+
+Validation:
+
+- `npm run check`, `npm run smoke:prompt-construction`, and `npm run smoke:step-verification` passed.
+- The no-send Images action check passed three consecutive trials.
+- A live image generated from the accepted yellow-star prompt was downloaded without resubmitting and visually matched the prompt.
+- A competing local ChatGPT workflow was detected and rejected before browser navigation.
+
+## 2026-09-30 — Support assistant image file cards in ChatGPT
+
+Changed:
+
+- Probed the current ChatGPT composer without submitting a prompt, then ran one authorized image request.
+- Confirmed a valid 1024×1024 PNG was available from an assistant file card despite a visible image-generation failure message.
+- Added file-card detection and verified browser download alongside the existing image-node route.
+- Recorded the mixed UI state in round checks and removed a school-specific tone from generic follow-up prompts.
+- Updated the bundled skill and output/failure guidance for the observed page.
+
+Validation:
+
+- `npm run check`
+- `npm run smoke:prompt-construction`
+- Downloaded and validated the existing file card through the updated detection and download functions without sending another prompt.
+
 ## 2026-09-30 — Align browser setup docs and protect linked skill installs
 
 Changed:

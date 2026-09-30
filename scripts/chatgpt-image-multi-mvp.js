@@ -9,6 +9,7 @@ const {
   writeRunMeta,
 } = require('../lib/chatgpt');
 const { readCdpUrlFromSessionFile } = require('../lib/session-setup');
+const { acquireBrowserLease } = require('../lib/chatgpt/browser-lease');
 
 function parseArgs(argv) {
   const options = {
@@ -20,7 +21,7 @@ function parseArgs(argv) {
     expectedImages: 3,
     allowPartial: true,
     reuseChat: false,
-    directPrompt: true,
+    directPrompt: false,
     timeoutMs: 900000,
     generationStartTimeoutMs: 30000,
     idleTimeoutMs: 20000,
@@ -111,12 +112,15 @@ function readPrompt(options) {
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const prompt = readPrompt(options);
-  const { browser, page } = await openChatGPTImageChat(options.cdpUrl, {
-    reuseChat: options.reuseChat,
-    directPrompt: options.directPrompt,
-  });
-
+  const releaseLease = acquireBrowserLease(options.cdpUrl);
+  let browser;
   try {
+    const session = await openChatGPTImageChat(options.cdpUrl, {
+      reuseChat: options.reuseChat,
+      directPrompt: options.directPrompt,
+    });
+    browser = session.browser;
+    const { page } = session;
     const baseline = new Set((await getGeneratedImages(page)).map((item) => item.id || item.src));
     const referenceUpload = await require('../lib/chatgpt/image-batch').uploadReferenceImages(page, options.referenceImages);
     await fillPrompt(page, prompt);
@@ -134,6 +138,10 @@ async function main() {
       generationStartTimeoutMs: options.generationStartTimeoutMs,
     });
 
+    const currentSubmission = await require('../lib/chatgpt/image-batch').getPromptSubmissionState(page, prompt);
+    if (!currentSubmission.lastUserMatches) {
+      throw new Error('ChatGPT conversation changed before downloading the image probe.');
+    }
     const freshImages = detectedImages.filter((item) => !baseline.has(item.id || item.src));
     const downloadResult = await downloadGeneratedImages(page, freshImages, {
       ...options,
@@ -164,7 +172,8 @@ async function main() {
     writeRunMeta(options.metaPath, meta);
     console.log(JSON.stringify(meta, null, 2));
   } finally {
-    await browser.close();
+    await browser?.close();
+    releaseLease();
   }
 }
 

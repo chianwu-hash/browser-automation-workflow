@@ -65,7 +65,7 @@ This script sends one prompt and waits for multiple generated image nodes from t
 
 ## Output
 
-The workflow downloads images from ChatGPT's generated image URLs and writes:
+The workflow downloads generated image nodes or assistant image file cards and writes:
 
 - image files named `<output-prefix>-01.png`, `<output-prefix>-02.png`, etc.
 - run metadata JSON with prompt, page URL, download paths, source URLs, byte sizes, and SHA-256 hashes
@@ -96,11 +96,21 @@ On 2026-05-27, an `ai-admin-workbench` MVP confirmed the same pattern more direc
 - `Thinking` mode: the same prompt produced and downloaded 3 independent images in one response.
 - The generated response used one main preview plus thumbnail images. Thumbnail nodes had small on-screen dimensions, but their `/backend-api/estuary/content?id=file_...` URLs downloaded full PNG files.
 
-For ChatGPT web multi-image batches, switch the composer model from `Instant` to `Thinking` before sending the prompt. Treat this as observed UI behavior rather than an official API contract. The API path has an explicit `n` parameter for multiple images; the ChatGPT web path must be verified against the current UI.
+The `Instant` / `Thinking` difference above is a May 2026 observation, not a current requirement. Verify multi-image behavior in the current UI before relying on it; use `--prompt-dir` when exact item count and order matter.
 
-On 2026-07-03, the current ChatGPT web UI exposed a home-composer shortcut labeled `建立圖像`. Clicking it changed the composer into a `創作圖像` action state. The automation should preserve that action state when filling the prompt; clearing the whole composer removes the image action and can make ChatGPT treat a wrapped prompt as an image-editing request that waits for an uploaded image. The current default route is explicit image mode, while `--direct-prompt` remains available for simpler prompts. Smoke tests produced downloadable `/backend-api/estuary/content?id=file_...` PNGs, but one run hung after sending with no assistant image response; treat that as a ChatGPT web-side transient and rerun before changing selectors.
+On 2026-07-03, ChatGPT web exposed a home-composer shortcut labeled `建立圖像`. Clicking it changed the composer into a `創作圖像` action state. This is historical UI evidence; the current default verifies the Images action before sending, while `--direct-prompt` is an explicit compatibility probe.
 
 On 2026-07-15, the home shortcut was no longer present. The `創作圖像` action remained in the composer plus menu, but its interactive element changed from a role-based menu item to a focusable `div.__menu-item[tabindex]`. Image mode now exposes an inline-selection chip with `data-id="picture_v2"`. The workflow supports both the older role-based menu markup and this newer focusable-div markup, and uses the chip identifier for mode verification. Run `npm run chatgpt:image-mode-smoke -- --cdp-url http://127.0.0.1:9232 --trials 3` for a non-generating live regression check.
+
+On 2026-09-30, the shared browser's current ChatGPT page exposed `form[data-chatgpt-composer]` and a file input accepting `image/*,video/*`. The no-send UI check passed. A single prompt produced a valid 1024×1024 PNG in an assistant file card named `blue_circle_test.png`, while the same response displayed `圖像生成失敗`. The older image-node detector found no image. The card's preview button intercepted pointer clicks on its download button; direct button activation produced a browser download event and a valid PNG. The workflow now detects and validates this file-card route and records the mixed response state.
+
+The follow-up run on 2026-09-30 found the current composer button `新增檔案和更多內容`, its `製作圖像` action, and a selected chip labeled `移除 製作圖像`. After the no-send image-mode check passed, one fresh `--image-mode` request generated an image node without a failure message. The downloaded PNG passed signature and byte-count validation. A response that also reports `圖像生成失敗` is now classified as failed even if a valid file card is recoverable.
+
+The batch runner now selects and verifies this Images action by default. Use `--direct-prompt` only for an intentional prompt-driven probe. When a round reports `圖像生成失敗`, the runner preserves that round's partial result and stops before submitting the next prompt, even if it downloaded a valid image. A headless two-round smoke test verifies that only the first prompt is sent in this mixed state.
+
+The Images action chip disappears from the current composer after a completed response. The runner therefore verifies and reselects it before every batch prompt, including later rounds in the same conversation.
+
+A later live probe revealed that another local image workflow was using the same shared browser. It switched the page to a different conversation, and the probe incorrectly credited that conversation's classroom illustration to a green-triangle prompt. That probe's metadata was invalidated. ChatGPT workflow scripts now reserve the shared browser before navigating and reject an already-running legacy job. Image waits verify that the latest user message still matches the accepted prompt before counting or downloading an image. A conversation URL can change while ChatGPT creates the permanent thread, so URL change alone is not a failure. Headless regression checks cover both conversation drift and first-round batch failure. After the other job finished, the accepted yellow-star prompt was recovered without resubmission; its downloaded image matched the prompt and had no generation-failure message.
 
 For a real deck sequence, be careful about putting all slide prompts into one combined prompt and asking ChatGPT to pick `image N of total`; that caused slide-order drift in testing. Use `--prompt-dir` when each slide must follow its own exact prompt. Use single-prompt multi-image generation for variants or for small batches where a combined prompt is acceptable.
 

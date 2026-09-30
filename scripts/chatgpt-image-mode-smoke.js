@@ -1,4 +1,5 @@
 const { parseArgs } = require('util');
+const { acquireBrowserLease } = require('../lib/chatgpt/browser-lease');
 const {
   connectToBrowser,
   ensureImageMode,
@@ -31,6 +32,13 @@ function parseOptions(argv) {
 
 async function clearImageMode(page) {
   await page.keyboard.press('Escape').catch(() => {});
+  const currentChip = page.locator('button[aria-label="移除 製作圖像"]').first();
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    if (await currentChip.isVisible().catch(() => false)) {
+      await currentChip.click();
+    }
+    await page.waitForTimeout(500);
+  }
   const chip = page.locator(
     '#prompt-textarea [data-inline-selection-pill][data-id="picture_v2"], ' +
     '#prompt-textarea [data-system-hint-type="picture_v2"]'
@@ -55,20 +63,24 @@ async function readImageModeState(page) {
   return page.evaluate(() => {
     const chip = document.querySelector(
       '#prompt-textarea [data-inline-selection-pill][data-id="picture_v2"], ' +
-      '#prompt-textarea [data-system-hint-type="picture_v2"]'
+      '#prompt-textarea [data-system-hint-type="picture_v2"], ' +
+      'button[aria-label="移除 製作圖像"]'
     );
     return {
       dataId: chip ? chip.getAttribute('data-id') : null,
       hintType: chip ? chip.getAttribute('data-system-hint-type') : null,
       keyword: chip ? chip.getAttribute('data-keyword') : null,
+      ariaLabel: chip ? chip.getAttribute('aria-label') : null,
     };
   });
 }
 
 async function main() {
   const options = parseOptions(process.argv.slice(2));
-  const browser = await connectToBrowser(options.cdpUrl);
+  const releaseLease = acquireBrowserLease(options.cdpUrl);
+  let browser;
   try {
+    browser = await connectToBrowser(options.cdpUrl);
     const { page } = await getChatGPTPage(browser);
     const results = [];
 
@@ -97,7 +109,8 @@ async function main() {
 
     console.log(JSON.stringify({ passed: results.length, results }, null, 2));
   } finally {
-    await browser.close();
+    await browser?.close();
+    releaseLease();
   }
 }
 

@@ -1,7 +1,11 @@
 const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { chromium } = require('playwright');
 const {
   clickSend: clickChatGPTSend,
+  runImageBatch,
   shouldRetryRoundAttempt,
   waitForImages,
 } = require('../lib/chatgpt/image-batch');
@@ -156,11 +160,114 @@ async function main() {
       pollMs: 50,
       allowPartial: true,
       idleTimeoutMs: 50,
+      imageSettleMs: 50,
       prompt,
       assistantMessageCountBefore: 0,
       generationStartTimeoutMs: 100,
     });
     assert.equal(delayedImages.length, 1, 'Thinking progress must suppress premature generation-start failure.');
+
+    await page.route('https://chatgpt.com/mock-conversation-drift', (route) => route.fulfill({
+      contentType: 'text/html; charset=utf-8',
+      body: `<div id="prompt-textarea" role="textbox" contenteditable="true"></div>
+        <section data-turn="user">A different browser job sent this prompt.</section>
+        <div id="image-other"><img alt="產生的圖片 1" style="width:200px;height:200px" src="https://chatgpt.com/backend-api/estuary/content?id=other-image"></div>`,
+    }));
+    await page.goto('https://chatgpt.com/mock-conversation-drift');
+    await assert.rejects(
+      () => waitForImages(page, [], {
+        minImages: 1,
+        timeoutMs: 1000,
+        pollMs: 50,
+        idleTimeoutMs: 50,
+        imageSettleMs: 50,
+        prompt,
+      }),
+      (error) => error.code === 'CHATGPT_CONVERSATION_DRIFT',
+      'Images in another conversation must never satisfy this request.'
+    );
+    await page.unroute('https://chatgpt.com/mock-conversation-drift');
+
+    await page.route('https://chatgpt.com/mock-file-card', (route) => route.fulfill({
+      contentType: 'text/html; charset=utf-8',
+      body: `<div><h4 data-conversation-role="assistant">ChatGPT 說：</h4>
+        <span class="group/resource-row"><span class="truncate">test.png</span>
+        <button aria-label="下載檔案">Download</button></span></div>
+        <div>圖像生成失敗<button>再試一次</button></div>`,
+    }));
+    await page.goto('https://chatgpt.com/mock-file-card');
+    const fileCardImages = await waitForImages(page, [], {
+      minImages: 1,
+      timeoutMs: 3000,
+      pollMs: 50,
+      allowPartial: true,
+      idleTimeoutMs: 50,
+      generationStartTimeoutMs: 500,
+    });
+    assert.equal(fileCardImages[0]?.kind, 'file-card');
+    assert.equal(fileCardImages[0]?.fileName, 'test.png');
+
+    const batchOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chatgpt-batch-stop-'));
+    try {
+      const pngBytes = Buffer.concat([
+        Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/gZkAAAAASUVORK5CYII=', 'base64'),
+        Buffer.alloc(1024),
+      ]);
+      const imageUrl = `data:image/png;base64,${pngBytes.toString('base64')}`;
+      await page.route('https://chatgpt.com/mock-batch-failure', (route) => route.fulfill({
+        contentType: 'text/html; charset=utf-8',
+        body: `<div id="prompt-textarea" class="ProseMirror" role="textbox" contenteditable="true"></div>
+          <script>
+            window.sendCount = 0;
+            document.querySelector('#prompt-textarea').addEventListener('keydown', (event) => {
+              if (event.key !== 'Enter') return;
+              event.preventDefault();
+              window.sendCount += 1;
+              const editor = event.currentTarget;
+              const text = editor.innerText;
+              editor.textContent = '';
+              const user = document.createElement('section');
+              user.setAttribute('data-turn', 'user');
+              user.textContent = text;
+              document.body.append(user);
+              const assistant = document.createElement('section');
+              assistant.setAttribute('data-turn', 'assistant');
+              assistant.innerHTML = '<div id="image-1"><img alt="產生的圖片 1" style="width:200px;height:200px" src="${imageUrl}"></div><span>圖像生成失敗</span>';
+              document.body.append(assistant);
+            });
+          <\/script>`,
+      }));
+      await page.goto('https://chatgpt.com/mock-batch-failure');
+      let batchError;
+      try {
+        await runImageBatch(page, {
+          promptText: prompt,
+          count: 2,
+          minImages: 2,
+          maxRounds: 2,
+          referenceImages: [],
+          outputDir: batchOutputDir,
+          outputPrefix: 'test',
+          timeoutMs: 3000,
+          generationStartTimeoutMs: 500,
+          idleTimeoutMs: 50,
+          imageSettleMs: 50,
+          pollMs: 50,
+          directPrompt: true,
+        });
+      } catch (error) {
+        batchError = error;
+      }
+      assert.equal(batchError?.code, 'CHATGPT_REPORTED_IMAGE_FAILURE');
+      assert.equal(await page.evaluate(() => window.sendCount), 1, 'Failure in round one must stop before a second submission.');
+      assert.equal(batchError.partialResult.rounds.length, 1);
+      assert.equal(batchError.partialResult.downloadedCount, 1);
+      assert.equal(batchError.partialResult.rounds[0].checks.assistantReportedFailure, true);
+      await page.unroute('https://chatgpt.com/mock-batch-failure');
+    } finally {
+      fs.rmSync(batchOutputDir, { recursive: true, force: true });
+    }
+
     assert.equal(
       shouldRetryRoundAttempt(new Error('generation did not start'), {
         composerCleared: true,
@@ -200,10 +307,11 @@ async function main() {
     }, sanitizedArgs);
     assert(escalationBrief.includes('first 60 seconds'));
     assert(escalationBrief.includes('transient_model_failure'));
-    assert(escalationBrief.includes('Remove --reuse-chat and --image-mode'));
+    assert(escalationBrief.includes('Remove --reuse-chat;'));
+    assert(escalationBrief.includes('Do not silently switch to prompt-driven generation.'));
     assert(!escalationBrief.includes('private prompt'));
 
-    console.log('Step verification smoke test passed for send acceptance and generation start.');
+    console.log('Step verification smoke test passed for send acceptance, generation start, file cards, and first-round batch stop.');
   } finally {
     await browser.close();
   }

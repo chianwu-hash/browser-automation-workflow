@@ -188,7 +188,8 @@ Validation:
 
 Recovery:
 
-- For a web-side hang, reconnect, start a fresh chat, re-enter image mode, and rerun once.
+- Before a prompt is accepted, recover the browser state and retry within the workflow limit.
+- After verified send acceptance, keep the same request under observation or preserve failure evidence; do not automatically resend it.
 - Do not retry indefinitely.
 - Preserve metadata and artifacts from failed attempts.
 
@@ -236,9 +237,12 @@ Recovery:
 |---|---|---|
 | Command lacks `--cdp-url` | Check whether `CDP_URL` is set and `browser:status` sees port 9232 | Confirm the browser session and pass explicit `--cdp-url`. |
 | Chinese prompt corrupted | Check whether prompt was passed inline through PowerShell | Move prompt to UTF-8 file and use `--prompt-file` or `--prompt-dir`. |
-| ChatGPT does not enter image mode | Check for `建立圖像`, `創作圖像`, and `picture_v2` chip state | Preserve action chip; rerun once before selector changes. |
+| ChatGPT does not enter image mode | Check the current `新增檔案和更多內容` menu, `製作圖像` action, and `移除 製作圖像` chip; older UIs used `創作圖像` or `picture_v2` | Stop before sending when the selected action cannot be verified; run the no-send image-mode smoke check. |
+| Another ChatGPT workflow owns the browser | Check the conflicting process ID reported by the browser lease | Wait for that workflow to finish; never run two jobs against the shared profile. |
+| A downloaded image belongs to another conversation | Check whether the latest visible user message still matches the accepted prompt; the URL may change during normal conversation creation | Mark a mismatched run failed as `CHATGPT_CONVERSATION_DRIFT`; keep the image only as diagnostic evidence. |
 | Prompt is visible but generation wait continues | Check prompt-fill and send-acceptance evidence separately | Require composer clear plus a matching new user message; fail within the short send timeout. |
 | ChatGPT returns too few images | Check mode, prompt shape, `--min-images`, and metadata | Use `--prompt-dir` for exact order; use multi-image probe only as evidence. |
+| ChatGPT reports image failure but shows a PNG/JPEG/WebP file card | Inspect the assistant card and download button; a card label alone is insufficient | Validate the image bytes, mark the run failed, preserve the partial result, and stop before the next batch prompt. Do not resend an accepted prompt. |
 | Gemini generation succeeds but no download appears | Check screenshots and metadata before declaring failure | Treat as export/download issue; use screenshot fallback or manual download. |
 | Drive picker action misses | Check iframe/picker scope and tab selection | Scope selectors to picker frame and selected Drive tab. |
 

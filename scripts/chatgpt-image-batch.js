@@ -7,6 +7,7 @@ const {
 const { readCdpUrlFromSessionFile } = require('../lib/session-setup');
 const { escalateToCodexCli } = require('../lib/escalation/codex-cli');
 const { captureBrowserEvidence } = require('../lib/escalation/browser-evidence');
+const { acquireBrowserLease } = require('../lib/chatgpt/browser-lease');
 
 function parseArgs(argv) {
   const options = {
@@ -20,7 +21,7 @@ function parseArgs(argv) {
     minImages: null,
     maxRounds: null,
     reuseChat: false,
-    directPrompt: true,
+    directPrompt: false,
     timeoutMs: 600000,
     generationStartTimeoutMs: 120000,
     idleTimeoutMs: 15000,
@@ -114,7 +115,9 @@ async function main() {
 
   let browser;
   let page;
+  let releaseLease;
   try {
+    releaseLease = acquireBrowserLease(options.cdpUrl);
     ({ browser, page } = await openChatGPTImageChat(options.cdpUrl, {
       reuseChat: options.reuseChat,
       directPrompt: options.directPrompt,
@@ -147,7 +150,9 @@ async function main() {
       referenceImages: options.referenceImages,
       generationMode: options.directPrompt ? 'prompt-driven' : 'explicit-image-mode',
       outputDir: options.outputDir,
+      partialResult: error.partialResult || null,
       failure: {
+        code: error.code || null,
         message: error.message,
         resubmitSuppressed: Boolean(error.resubmitSuppressed),
         failedAt: new Date().toISOString(),
@@ -166,6 +171,12 @@ async function main() {
         screenshotPath: null,
       }))
       : null;
+    if (error.retryAttempts >= 2) {
+      await browser?.close();
+      browser = null;
+      releaseLease?.();
+      releaseLease = null;
+    }
     const escalation = error.retryAttempts >= 2
       ? escalateToCodexCli({
         workflow: 'chatgpt-image-batch',
@@ -198,6 +209,7 @@ async function main() {
     throw error;
   } finally {
     await browser?.close();
+    releaseLease?.();
   }
 }
 

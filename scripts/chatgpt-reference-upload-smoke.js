@@ -1,4 +1,5 @@
 const { parseArgs } = require('util');
+const { acquireBrowserLease } = require('../lib/chatgpt/browser-lease');
 const {
   assertChatGPTLoggedIn,
   connectToBrowser,
@@ -22,7 +23,7 @@ function parseOptions(argv) {
 
 async function inspectComposer(page, expectedNames) {
   return page.evaluate((names) => {
-    const form = document.querySelector('form[data-type="unified-composer"]');
+    const form = document.querySelector('form[data-type="unified-composer"], form[data-chatgpt-composer]');
     if (!form) return { formFound: false };
     const normalize = (value) => (value || '').replace(/\s+/g, ' ').trim();
     const elements = [...form.querySelectorAll('*')];
@@ -46,12 +47,14 @@ async function main() {
   const options = parseOptions(process.argv.slice(2));
   const references = validateReferenceImages(options.referenceImages);
   if (!references.length) throw new Error('Pass at least one --reference-image.');
-  const browser = await connectToBrowser(options.cdpUrl);
+  const releaseLease = acquireBrowserLease(options.cdpUrl);
+  let browser;
   try {
+    browser = await connectToBrowser(options.cdpUrl);
     const { page } = await getChatGPTPage(browser);
     await assertChatGPTLoggedIn(page);
     await ensureNewChat(page);
-    const input = page.locator('form[data-type="unified-composer"] input#upload-files[type="file"]').first();
+    const input = page.locator('form[data-type="unified-composer"] input#upload-files[type="file"], form[data-chatgpt-composer] input[type="file"][accept="image/*,video/*"]').first();
     await input.waitFor({ state: 'attached', timeout: 15000 });
     await input.setInputFiles(references.map((item) => item.path));
     const immediateFiles = await input.evaluate((element) => [...(element.files || [])].map((file) => file.name));
@@ -62,7 +65,8 @@ async function main() {
     }
     console.log(JSON.stringify({ immediateFiles, samples }, null, 2));
   } finally {
-    await browser.close();
+    await browser?.close();
+    releaseLease();
   }
 }
 

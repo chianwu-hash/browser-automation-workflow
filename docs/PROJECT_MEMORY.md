@@ -62,11 +62,14 @@ Core behavior:
 - connect to an already logged-in ChatGPT browser session through CDP
 - start a fresh chat by default
 - enter and preserve ChatGPT image mode
+- select and verify the current Images action before every batch prompt; the chip can disappear after a response
+- reserve the shared ChatGPT browser while a workflow runs and reject a concurrent image job
 - prefer UTF-8 prompt files
 - support one-image-per-prompt directory runs
 - support same-brief variants from one prompt
 - keep single-response multi-image probing separate from ordered production generation
 - download distinct generated images from ChatGPT `/backend-api/estuary/content?id=file_...` URLs using page credentials
+- detect assistant image file cards and validate their downloaded bytes when a generated image is delivered as a file instead of an `<img>` node
 - write metadata with output paths, source URLs, byte sizes, SHA-256 hashes, and generated image IDs
 - preserve prompt-file authority instead of silently injecting project-specific brand or deck rules
 
@@ -76,7 +79,10 @@ Known ChatGPT UI facts:
 - For exact slide order, use `--prompt-dir`; avoid one combined prompt that asks ChatGPT to infer slide numbers.
 - Multi-image in one assistant response is a probe, not a production guarantee.
 - The workflow supports both older role-based `建立圖像` menu items and newer focusable `div.__menu-item[tabindex]` markup, and verifies current image mode through the `picture_v2` chip when available.
-- If the web UI hangs after send, rerun once before changing selectors.
+- If the web UI hangs after a verified send, keep waiting or preserve failure evidence; do not automatically resubmit the accepted prompt.
+- A response can include a valid downloadable image file card while also displaying `圖像生成失敗`; preserve both the artifact result and the reported failure. Never resend after verified send acceptance.
+- Stop the batch immediately when a round reports image-generation failure, even when its file card is downloadable.
+- Check that the latest visible user message still matches the accepted prompt before attributing an image. A conversation URL may change during normal thread creation.
 
 ### Gemini image workflow
 

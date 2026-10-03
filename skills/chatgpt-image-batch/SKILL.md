@@ -10,12 +10,12 @@ Use this skill when the task is to operate ChatGPT web image generation through 
 ## Quickstart
 
 1. Open or validate the AI work browser first. If the `ai-work-browser` skill is available, use it for this step.
-2. Use `http://127.0.0.1:9232` as the default CDP URL.
+2. Use the endpoint and exact target returned by `ai-work-browser`, not a fixed port. With the portable manager prefer `npm run browser:run -- --workflow chatgpt:image-batch -- <workflow arguments>`; it binds the conversation and manages the worker lifecycle. Existing machine launchers retain their own routing.
 3. Log in to ChatGPT in that browser if needed; the user must do login manually.
 4. Prefer UTF-8 prompt files over inline prompt text, especially for Chinese prompts.
 5. Current production runs verify the **製作圖像** action in **Chat** mode before sending. The workflow must not remain in **Work** mode.
 6. When the image depends on a supplied style, character, product, or brand reference, pass each local image with a repeated `--reference-image` argument. Verify attachment evidence before sending.
-7. Run only one ChatGPT browser workflow at a time against the shared profile. The CLI reserves the browser and rejects another active workflow before navigation. If it reports a conflicting PID, wait for that job to finish; do not bypass the guard.
+7. Run only one browser workflow at a time against each endpoint. Independent registered instances may run concurrently. The CLI rejects competing ChatGPT or Gemini jobs on the same endpoint before navigation; wait rather than bypass the guard.
 
 To trigger this skill reliably, include `ChatGPT 工作瀏覽器` or `工作瀏覽器` in the request, for example:
 
@@ -53,7 +53,7 @@ npm run chatgpt:image-multi-mvp -- --cdp-url http://127.0.0.1:9232 --prompt-file
 
 - Use `ai-work-browser` to open or validate the shared browser state when available.
 - If no `ai-work-browser` launcher is available, use the repo's CBS initializer: `npm run browser:init -- --app chatgpt --browser chrome --port 9232 --yes`.
-- Prefer an explicit `--cdp-url`, normally `http://127.0.0.1:9232`.
+- Prefer the supervised wrapper for portable clones. Legacy explicit `--cdp-url` commands use the acquired endpoint, not a guessed default; register the worker and maintain the launcher lease when using an existing machine launcher.
 - Confirm ChatGPT is logged in before running the workflow.
 - Run `npm run chatgpt:ui-contract-smoke -- --cdp-url http://127.0.0.1:9232` after a ChatGPT UI update or when mode selection/send behavior drifts. This check does not submit a prompt.
 - Run `npm run chatgpt:reference-upload-smoke -- --cdp-url http://127.0.0.1:9232 --reference-image <file>` when attachment behavior drifts. It uploads to a fresh composer without sending and reports thumbnail/removal-control evidence.

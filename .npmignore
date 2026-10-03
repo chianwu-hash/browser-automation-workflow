@@ -1,0 +1,14 @@
+.chat-mode/
+.browser-profiles/
+.browser-sessions/
+.env
+.env.*
+automation-output/
+output/
+scratch/
+tmp/
+*.log
+*.sqlite
+*.sqlite-*
+*.bak
+scripts/download-current-chatgpt-image.js

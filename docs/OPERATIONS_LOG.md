@@ -4,6 +4,28 @@ This file records dated changes that future AI assistants and maintainers may ne
 
 Do not record secrets, cookies, tokens, full session configs, private browser profile data, sensitive screenshot contents, or account credentials.
 
+## 2026-10-03 — 釐清分身啟用時的登入提示
+
+### 後續實作：公開版選用分身
+
+- 新增公開管理器與 `browser:manage`／`browser:run`，預設單一持久瀏覽器，明確啟用才新增一個設定中的分身。沿用 CBS 所解析的 cdp-tools，未修改兩個依賴 repo。
+- 設定、占用與端點工作鎖使用 SQLite 原子交易，資料放 repo 外；對話保持占用憑證與精確 target，存活 worker 的 PID／啟動時間保護逾時回收。停用、更新與重啟用不刪 profile。
+- 安裝成功後實際顯示簡短啟用提示，並在安裝版參考文件記錄 runtime repo 位置。Chrome 同步選用，網站需手動登入。
+- ChatGPT 與 Gemini 共用端點互斥；不同端點可並行，localhost 別名不能繞過同端點鎖。無法解析端點的舊程序保守阻擋。
+- 受監督工作登記真正 PID 後才放行，每 30 秒續約，結束後釋放；手動無對話 ID 的工作退回單瀏覽器。新增 CDP 介面不接管下載。
+
+驗證紀錄：管理器自動測試、repo 語法／技能檢查、既有 prompt 與 step smoke；另透過本機共用啟動器取得已登記實例，以唯讀 CDP 核對 profile 與精確 target，完成後釋放。沒有生成圖片、登入、複製 profile 或改動本機路由。Linux/macOS 尚未實機驗收；未提交、推送或發布這次公開版變更。
+
+打包檢查另確認 runtime／技能參考文件完整，並排除 `.chat-mode` 討論紀錄與既有未追蹤的單次下載腳本；該腳本保留原樣。新增 npm 發布檔案清單及 scripts 子目錄的排除規則，沒有實際發布套件。
+
+變更：
+
+- 在公開版 `ai-work-browser` 技能加入分身建立後的登入提示，明確說明 Chrome 帳號登入與同步是選用功能。
+- 區分瀏覽器資料同步與網站登入工作階段；分身需各自手動登入所需網站。
+- 提示僅在已支援分身的啟動器成功建立分身後使用。本次只修改文件，未將本機分配器移植到公開 repo，也未新增安裝完成提醒或發布。
+
+驗證：檢查技能差異，執行 repo 檢查與技能格式驗證；未操作瀏覽器或登入帳號。
+
 ## 2026-09-30 — Verify image mode and isolate ChatGPT image batches
 
 Changed:

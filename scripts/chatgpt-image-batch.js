@@ -208,8 +208,7 @@ async function main() {
     writeRunMeta(options.metaPath, failureMeta);
     throw error;
   } finally {
-    await browser?.close();
-    releaseLease?.();
+    try { await browser?.close(); } finally { releaseLease?.(); }
   }
 }
 

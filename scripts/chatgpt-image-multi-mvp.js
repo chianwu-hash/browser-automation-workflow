@@ -172,8 +172,7 @@ async function main() {
     writeRunMeta(options.metaPath, meta);
     console.log(JSON.stringify(meta, null, 2));
   } finally {
-    await browser?.close();
-    releaseLease();
+    try { await browser?.close(); } finally { releaseLease(); }
   }
 }
 

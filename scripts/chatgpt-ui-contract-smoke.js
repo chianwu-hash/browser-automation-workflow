@@ -54,8 +54,7 @@ async function main() {
     }
     console.log(JSON.stringify(result, null, 2));
   } finally {
-    await browser?.close();
-    releaseLease();
+    try { await browser?.close(); } finally { releaseLease(); }
   }
 }
 

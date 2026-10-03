@@ -109,8 +109,7 @@ async function main() {
 
     console.log(JSON.stringify({ passed: results.length, results }, null, 2));
   } finally {
-    await browser?.close();
-    releaseLease();
+    try { await browser?.close(); } finally { releaseLease(); }
   }
 }
 

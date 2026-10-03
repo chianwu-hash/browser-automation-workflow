@@ -3,6 +3,8 @@
   "version": "0.2.0",
   "description": "Reusable browser automation workflows for AI tools, built around logged-in sessions, prompt orchestration, and reliable UI state handling.",
   "type": "commonjs",
+  "engines": { "node": ">=22.13.0" },
+  "files": ["lib/", "scripts/", "skills/", "docs/", "templates/", "README.md"],
   "scripts": {
     "check": "node scripts/check.js",
     "skills:install": "node scripts/install-skills.js",
@@ -11,6 +13,9 @@
     "browser:status": "cbs-browser-status",
     "browser:smoke": "node scripts/browser-smoke.js",
     "browser:session-setup": "cbs-browser-init",
+    "browser:manage": "node scripts/ai-work-browser.js",
+    "browser:run": "node scripts/ai-work-browser.js run",
+    "test:browser-manager": "node --test scripts/tests/ai-work-browser.test.js",
     "guided:start": "cbs-guided-start",
     "chatgpt:image-batch": "node scripts/chatgpt-image-batch.js",
     "chatgpt:image-mode-smoke": "node scripts/chatgpt-image-mode-smoke.js",

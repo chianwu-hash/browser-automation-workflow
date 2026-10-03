@@ -1,6 +1,6 @@
 # Project Memory
 
-Last reviewed: 2026-09-30
+Last reviewed: 2026-10-03
 
 ## Project identity
 
@@ -26,6 +26,10 @@ Last reviewed: 2026-09-30
 5. Raw Threads as unverified evidence only.
 
 ## Current architecture
+
+The portable optional-clone coordinator is now repo-owned in `lib/ai-work-browser/` with CLI `scripts/ai-work-browser.js`. It uses CBS-resolved `cdp-tools` for launch and Node SQLite transactions for local configuration, conversation leases and endpoint job exclusion. This does not change machine-specific launcher routing or publish changes to either dependency repo. Existing CBS session paths can be explicitly adopted. Browser state lives in the user's data directory, not installed skills or the repo.
+
+Default installation remains single-browser. User-requested activation creates one setup-only clone; after manual setup it can join per-conversation allocation. Advanced explicit expansion is capped at three instances in this version. Chrome account sync is optional and not website login transfer. Implementation/validation details are in the runbook and bundled clone reference; Windows is the tested platform, not a claim of cross-platform live validation.
 
 This repo is workflow infrastructure, not product-specific business logic.
 

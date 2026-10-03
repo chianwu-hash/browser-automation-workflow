@@ -78,6 +78,16 @@ that vault's normal workflow instead.
 
 Restart Codex after installing or updating skills.
 
+AI 工作瀏覽器預設使用單一持久瀏覽器。需要並行工作時，可對 AI 說「我想要使用 AI 工作瀏覽器分身」，再依引導啟用及手動登入所需網站。Chrome 帳號登入與同步是選用，不會同步網站登入工作階段。公開管理器需要 Node.js 22.13 以上；Windows 另需 PowerShell 7 的 `pwsh`，用來核對程序啟動時間與舊瀏覽器資料目錄。
+
+沒有本機共用啟動器時，使用 `npm run browser:manage -- init` 初始化；若已有 CBS 瀏覽器設定，改用 `init --session-file <原設定檔>`，保留原 profile。一般工作使用：
+
+```powershell
+npm run browser:run -- --workflow chatgpt:image-batch -- --prompt-file <file> --output-dir <out>
+```
+
+分身預設不啟用；`enable` 新增一個設定中的分身，完成手動登入並標記 `ready` 後才供對話分配。詳見 [分身設定與占用管理](skills/ai-work-browser/references/clones.md)。Windows 為目前驗證平台，其他平台尚未實機驗收。使用者資料放 repo 外，更新技能不刪登入資料。
+
 Open the shared AI work browser. If your machine has `ai-browser-launch`, use
 that stable launcher:
 

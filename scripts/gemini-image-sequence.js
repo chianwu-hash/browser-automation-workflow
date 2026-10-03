@@ -9,6 +9,7 @@ const {
 const { readCdpUrlFromSessionFile } = require('../lib/session-setup');
 const { escalateToCodexCli } = require('../lib/escalation/codex-cli');
 const { captureBrowserEvidence } = require('../lib/escalation/browser-evidence');
+const { acquireBrowserLease } = require('../lib/ai-work-browser/job-lease');
 
 function parseArgs(argv) {
   const options = {
@@ -88,7 +89,9 @@ async function main() {
   const prompts = collectPromptEntries(options);
   let browser;
   let page;
+  let releaseLease;
   try {
+    releaseLease = acquireBrowserLease(options.cdpUrl);
     ({ browser, page } = await openGeminiImageChat(options.cdpUrl, { reuseChat: options.reuseChat }));
     const results = await runPromptSequence(page, prompts, options);
     const meta = {
@@ -165,7 +168,7 @@ async function main() {
     writeRunMeta(options.metaPath, failureMeta);
     throw error;
   } finally {
-    await browser?.close();
+    try { await browser?.close(); } finally { releaseLease?.(); }
   }
 }
 

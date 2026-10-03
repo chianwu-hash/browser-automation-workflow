@@ -1,0 +1,5 @@
+download-current-chatgpt-image.js
+*.log
+*.sqlite
+*.sqlite-*
+*.bak

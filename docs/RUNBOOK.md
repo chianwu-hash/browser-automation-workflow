@@ -84,6 +84,18 @@ Escalation:
 
 ### Prepare a work browser session
 
+#### Portable optional clones (2026-10-03)
+
+On machines without a configured shared launcher, use `npm run browser:manage -- init`, or `init --session-file <existing-CBS-config>` when upgrading. The manager adopts only the profile path and endpoint; it does not migrate cookies or delete the existing session config. Default mode has one instance, with conversation exclusion even before clones are enabled.
+
+The installed skill points to its runtime repo in `references/runtime-location.md`. Follow its [clone setup reference](../skills/ai-work-browser/references/clones.md) for explicit activation, setup protection, per-thread acquisition and release. `enable` registers one setup-only clone; `ready` allows allocation after manual setup. `disable` stops new clone allocations and drains existing work without deleting profiles. Updates to installed skills leave browser state outside the repo untouched.
+
+Prefer `npm run browser:run -- --workflow <workflow> -- <workflow-arguments>` for portable managed work. It registers the actual worker PID before allowing CDP, sets the exact page target, renews every 30 seconds and releases after worker exit. Do not supply a conflicting CDP URL/session file. Legacy direct workflow commands retain endpoint-scoped mutual exclusion but do not replace conversation leases. A machine-specific shared launcher remains authoritative on machines that have one.
+
+Validation: `npm run test:browser-manager`, `npm run check`, and the existing prompt/step smoke tests. Node 22.13+ is required; validated runtime is Node 24.14.0 on Windows with PowerShell 7. Node's built-in SQLite still emits an experimental warning on this runtime. Linux/macOS logic is present but has not been validated on physical hosts. Live CDP verification uses a registered instance from the machine launcher and checks profile/target only, without creating an unregistered profile or submitting a website request.
+
+Persistent downloads must not use Browser/Page `setDownloadBehavior`, including framework wrappers or enabling download events. Preserve the original download history and native click-to-open behavior. Tests inspect the new adapter's CDP command set; live smoke does not change download handling.
+
 Purpose: expose an already logged-in browser to Playwright through CDP.
 
 Steps:

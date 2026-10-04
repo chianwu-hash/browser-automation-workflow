@@ -4,6 +4,9 @@ This folder contains the reusable operating knowledge for browser-based AI autom
 
 Current core documents:
 
+- [browser-recovery.md](browser-recovery.md)
+  依網站變動頻率診斷故障、即時修正、安全接續、完成度與耗時紀錄
+
 - `PROJECT_MEMORY.md`
   repo-local AI memory, durable decisions, and safety boundaries
 - `RUNBOOK.md`

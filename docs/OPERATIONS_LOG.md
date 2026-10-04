@@ -4,6 +4,16 @@ This file records dated changes that future AI assistants and maintainers may ne
 
 Do not record secrets, cookies, tokens, full session configs, private browser profile data, sensitive screenshot contents, or account credentials.
 
+## 2026-10-04 — 依網站變動頻率制定診斷與修正流程
+
+- 新增 `docs/browser-recovery.md`，記錄 CDP 優先、頻繁變動 AI 服務及長期穩定系統的不同排查順序；所有腳本變更需有現場證據，避免將逾時直接判為改版。
+- 明定定位失敗、分類原因、最小修正、確認接續點、驗證成果及回報的操作程序，沿用 workflow 個別重試限制及已送出請求不得自動重送的規則。
+- 區分原始檔取得與 Chrome 原生下載完成，記錄另存視窗、額外工具、人工協助、失敗恢復及總耗時。
+- 更新 README、文件入口、AGENTS、CLAUDE、RUNBOOK 與 PROJECT_MEMORY；自動控制權接續維持未實作／未驗證。
+- 本次為文件規範更新，沒有改動 runtime、業務腳本、本機設定或安裝版技能；未追蹤的既有下載腳本保留，不納入提交。
+
+驗證：`npm run check`、Git 差異空白檢查及修改文件的相對連結檢查；未執行網站操作或生成新成果。
+
 ## 2026-10-03 — 釐清分身啟用時的登入提示
 
 ### 後續實作：公開版選用分身

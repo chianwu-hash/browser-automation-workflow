@@ -1,6 +1,6 @@
 # Project Memory
 
-Last reviewed: 2026-10-03
+Last reviewed: 2026-10-04
 
 ## Project identity
 
@@ -119,6 +119,17 @@ Known Gemini UI facts:
 - Drive picker actions should be scoped to the picker frame and may need to handle Google Workspace connect dialogs.
 
 ## Active decisions
+
+### 2026-10-04 — CDP 優先與依網站變動頻率修正
+
+狀態：有效。來源：使用者在多輪瀏覽器測試後確認的操作與維護方向。
+
+- CDP 為主要操作方式，extension 保留作必要時的輔助，穩定性與完整完成優先於速度。
+- ChatGPT、Gemini、NotebookLM 等介面變動較頻繁；公文、財管系統依操作方經驗長期穩定。分類不代表不會改版；所有故障先判斷原因，有現場變動證據才修改定位。
+- 由 AI 助手在已授權任務中探查、做最小修正、安全接續、核對成果並回報；既有 workflow 重試與輸出契約仍優先。
+- 尚未確認 CDP 無法完成而 extension 能完成的必要接手案例；自動接續暫列未驗證，不預先實作通用交接。
+- 完整原始檔取檔、原生下載及額外工具／人工協助分開記錄。暫存資料另存不等於完成 Windows 另存視窗。
+- 流程與紀錄要求見 [browser-recovery.md](browser-recovery.md)。此決策更新是文件規範，未新增通用自動修復引擎或全面逐步日誌；也未實證長期穩定率與普遍速度優勢。
 
 ### 2026-08-12 Keep product and brand rules in prompt files
 

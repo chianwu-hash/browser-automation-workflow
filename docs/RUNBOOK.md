@@ -1,6 +1,6 @@
 # Project Runbook
 
-Last reviewed: 2026-09-30
+Last reviewed: 2026-10-04
 Owner: project maintainers and authorized AI assistants
 
 ## Scope
@@ -244,6 +244,10 @@ Recovery:
 - Do not retry indefinitely.
 
 ## Incident diagnosis
+
+先依 [瀏覽器工作流程診斷與修正](browser-recovery.md) 分類網站與失敗原因。長期穩定系統優先沿用已驗證腳本，排查連線、登入、等待、資料、彈窗與擴充功能；頻繁變動的服務依目前頁面核對介面契約。兩者都不能僅因逾時認定改版。
+
+原始檔取得與瀏覽器原生下載分開驗收；Windows「另存新檔」未完成時，不能將暫存檔另存算成原生下載完成。修正過程保留失敗、恢復、驗證與耗時紀錄，接續前先確認已完成操作，並遵守各 workflow 的重試及停止契約。
 
 | Symptom | First checks | Confirmed fix or next action |
 |---|---|---|

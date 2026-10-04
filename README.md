@@ -21,6 +21,8 @@ It is intended to hold reusable patterns that can be shared across projects such
 
 ## Scope
 
+操作以 CDP 為主，必要時評估 extension 輔助；穩定性與完整完成優先於速度。頻繁變動的 AI 服務與長期穩定的行政系統採不同診斷策略，先確認失敗原因，再由 AI 助手依證據修正與驗證。詳見 [瀏覽器工作流程診斷與修正](docs/browser-recovery.md)。自動控制權接續尚未實作或驗證。
+
 This repo focuses on the workflow layer, not product-specific business logic.
 
 Examples of what belongs here:

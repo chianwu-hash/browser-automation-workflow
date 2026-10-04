@@ -17,6 +17,7 @@ This repository uses repo-local memory. Before making changes, read the project 
    - `skills/gemini-image-workflow/references/failure-policy.md`
 6. Treat repo documents as the source of truth over Nowledge Memory, Working Memory, or raw Threads.
 7. Do not overwrite unrelated user changes.
+8. 遇到瀏覽器流程故障或準備修正腳本時，先讀取 `docs/browser-recovery.md`。依網站變動頻率分類，先確認失敗原因及已完成狀態；原 workflow 的重試與輸出契約仍優先。
 
 ## Safety rules
 

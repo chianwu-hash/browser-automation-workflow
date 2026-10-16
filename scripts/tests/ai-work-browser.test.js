@@ -166,7 +166,7 @@ test('runtime launches registered profile with extensions and no download interc
   await openInstance({ port: 9232, profile }, { foreground: true, tools, transport: { connectOverCDP: async () => mockBrowser(profile) } });
   assert.equal(launched.profilePath, profile);
   assert.equal(launched.allowExtensions, true);
-  assert.ok(launched.args.includes('--enable-automation'));
+  assert.ok(!launched.args.includes('--enable-automation'));
 });
 
 test('exact target ignores same-URL and frontmost pages; missing target fails', async () => {

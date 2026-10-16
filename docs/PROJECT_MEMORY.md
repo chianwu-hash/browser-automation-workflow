@@ -263,5 +263,6 @@ Reason:
 ## User preferences for this project
 
 - Use Traditional Chinese when communicating with the user.
+- 2026-10-13 使用者明確指定：本機 `ai-work-browser` 技能及其下游操作，除非使用者明確要求顯示或帶到前景，否則禁止啟用 AI 工作瀏覽器視窗／分頁或搶用桌面輸入。登入、人工處理、桌面工具及故障恢復不構成例外；任務或登入授權不等於前景授權。技能來源及程式保護均已更新：共用啟動器 `-Foreground`／可攜管理器 `--foreground` 只供當次明確指示使用；預設冷啟動停止，新分頁使用背景 CDP，ChatGPT／Gemini 與本機公文／財管移除前景呼叫。下游 Node 腳本透過本機 `run-background.cjs` 取得連線保護。這是合作式保護，不能阻止繞過入口的任意 CDP、其他語言或桌面程式。
 - Prefer direct, evidence-based engineering communication.
 - Keep secrets and logged-in browser state out of memory.

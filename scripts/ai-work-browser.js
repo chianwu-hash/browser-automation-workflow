@@ -27,6 +27,7 @@ function parse(argv) {
   for (let i = 1; i < argv.length; i++) {
     if (argv[i] === '--') { options.args = argv.slice(i + 1); break; }
     if (argv[i] === '--setup') { options.setup = true; continue; }
+    if (argv[i] === '--foreground') { options.foreground = true; continue; }
     const key = { '--root': 'root', '--owner': 'owner', '--lease-id': 'leaseId', '--instance': 'instanceId',
       '--url': 'url', '--session-file': 'sessionFile', '--port': 'port', '--worker-pid': 'workerPid', '--workflow': 'workflow' }[argv[i]];
     if (!key || !argv[i + 1]) throw new Error(`無效參數：${argv[i]}`);
@@ -44,7 +45,7 @@ async function openLease(store, options, opener = openInstance) {
     store.heartbeat(options.owner, lease.leaseId, process.pid);
     protectedStartup = true;
     const instance = store.transaction((state) => state.instances.find((i) => i.id === lease.instance));
-    const targetId = await opener(instance, { url: options.url, targetId: lease.targetId });
+    const targetId = await opener(instance, { url: options.url, targetId: lease.targetId, foreground: options.foreground === true });
     store.setTarget(options.owner, lease.leaseId, targetId);
     return { ...lease, targetId };
   } catch (error) {

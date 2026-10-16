@@ -5,6 +5,10 @@ description: Open and reuse a persistent AI work browser, preserve site login st
 
 # AI 工作瀏覽器
 
+## 背景操作硬規則
+
+除非使用者明確指定顯示或帶到前景，禁止啟用 AI 工作瀏覽器視窗／分頁。任務、登入、設定、故障恢復與 `--setup` 都不代表前景授權。可攜管理器預設拒絕冷啟動；僅當次明確指示可加 `--foreground`。已啟動的瀏覽器使用背景 CDP 建頁；不能因背景操作失敗呼叫前景指令或另用 CBS／裸 Chrome 啟動繞過停點。
+
 預設沿用一個持久工作瀏覽器，不接管使用者日常 Chrome。只有使用者要求「我想要使用 AI 工作瀏覽器分身」時才啟用分身；啟用後自動安排空閒實例，不要求使用者選擇。
 
 ## 入口

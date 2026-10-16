@@ -4,6 +4,25 @@ This file records dated changes that future AI assistants and maintainers may ne
 
 Do not record secrets, cookies, tokens, full session configs, private browser profile data, sensitive screenshot contents, or account credentials.
 
+## 2026-10-13 — 本機 AI 工作瀏覽器禁止擅自帶到前景
+
+### 後續：程式層保護
+
+- 根因：ChatGPT／Gemini 工作階段、公文分文及財管登入腳本含直接前景呼叫；共用引擎透過 `/json/new` 開分頁且冷啟動沒有前景授權 gate。未判定為網站改版。
+- 新增 `lib/ai-work-browser/background-policy.js`，攔截 Playwright／Puppeteer 頁面及 CDP session 的前景／視窗操作；背景建頁前確認已有視窗。冷啟動預設拒絕，只有明確 `foreground: true` 才允許。管理器提供 `--foreground`，不從環境變數推導授權。
+- 本機共用啟動器與命令入口新增 `-Foreground`；背景開頁使用 `D:/ai-browser/open-background-target.js`。本機保護模組部署於 `D:/ai-browser/background-policy.cjs` 及共用 cdp-safe-client，三份來源以雜湊核對。
+- 移除 ChatGPT／Gemini、公文分文、財管登入及公文登入診斷的直接前景操作。下游技能改走 `D:/ai-browser/run-background.cjs`，先登記 worker 再放行，攔截受選端點的 Playwright／Puppeteer、CDP WebSocket 與 HTTP 前景路徑，結束後釋放占用。未修改其他專案舊腳本或歷史副本；透過此入口執行時會拒絕其前景呼叫。
+- 實機先發現背景建頁事件接收時序，調整為先監聽事件再建立並核對精確 target；後續 Playwright 截圖逾時，改用有上限的 CDP 檢查，不以切到前景恢復。截圖結果與前景保護分開驗收。
+
+驗證：背景保護測試 6 項、管理器測試 22 項、兩個 repo 的 check、prompt／step smoke、技能驗證、PowerShell 語法／ASCII、冷啟動拒絕 mock。分身01空白頁實機背景點擊、三種前景拒絕、啟動器背景開頁及 Playwright newPage 均保持原頁籤；304 次前景視窗取樣無切換。初次獨立測試截圖 9336 bytes；後續 CDP 截圖逾時未取得位元組，故不宣稱背景截圖普遍可用。下游 runner 實機確認 Playwright、Puppeteer、原生 WebSocket、HTTP 前景拒絕與端點錯配拒絕。未送出生成、公文或財管業務操作。
+
+- 依使用者明確要求，更新 skill-vault 的 `ai-work-browser/SKILL.md`；安裝版 junction 指向同一來源，保留既有未提交修改。
+- 將背景操作提升為硬規則，僅使用者明確指定顯示或切到前景才可啟用；移除登入、人工處理及桌面操作的自動例外，補上啟動器／下游腳本檢查與無法背景執行時的停點。
+- 修正原生密碼選單桌面操作及登入提示，避免將任務、登入或開啟網址授權解讀為前景授權。
+- 本次為本機技能規範更新，未修改公開版技能、啟動器或下游程式，未啟動或操作瀏覽器；不宣稱已有執行階段強制攔截。
+
+驗證：技能格式驗證（Python UTF-8 模式）、修改檔案差異空白檢查，以及來源／安裝版 SHA-256 一致性核對。
+
 ## 2026-10-04 — 依網站變動頻率制定診斷與修正流程
 
 - 新增 `docs/browser-recovery.md`，記錄 CDP 優先、頻繁變動 AI 服務及長期穩定系統的不同排查順序；所有腳本變更需有現場證據，避免將逾時直接判為改版。

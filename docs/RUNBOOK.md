@@ -84,6 +84,16 @@ Escalation:
 
 ### Prepare a work browser session
 
+#### 背景執行與前景授權（2026-10-13）
+
+工作瀏覽器預設不得取得桌面焦點。共用啟動器使用背景 CDP 建頁；未啟動或沒有現存視窗時直接停止，請使用者自行啟動。只有使用者明確要求顯示時才在當次呼叫傳入 `-Foreground`；可攜管理器對應 `--foreground`。`--setup`、登入、重試及環境變數不代表前景授權。
+
+本機下游 Node 腳本使用 `node D:/ai-browser/run-background.cjs --lease-id <本次占用> <腳本絕對路徑> <腳本參數>`；worker 登記後才開始操作，入口續約並在 worker 退出後釋放占用。舊腳本若含前景指令會失敗停止，不能以裸 Node 規避。可攜 workflow 的工作階段已內建 Playwright 保護。
+
+`npm run test:browser-background` 檢查拒絕前景、背景建頁、無視窗及冷啟動停點；`D:/ai-browser/tests/cold-launch.test.ps1` 使用 mock，不啟動 Chrome。實機測試須取得空閒已登記實例後，執行 `D:/ai-browser/tests/background-live.ps1`，只操作空白頁並記錄前景 HWND 取樣、原頁籤、背景點擊及截圖結果；截圖逾時不得改用前景。
+
+本機背景保護模組的來源為 `lib/ai-work-browser/background-policy.js`，更新後同步部署至 `D:/ai-browser/background-policy.cjs` 及 cdp-safe-client 套件的 `background-policy.js`，核對 SHA-256。保護入口不是 OS 沙箱，直接 CDP、其他語言、子程序及網站原生彈窗仍需個別檢查，不能宣稱可攔截任意程式。
+
 #### Portable optional clones (2026-10-03)
 
 On machines without a configured shared launcher, use `npm run browser:manage -- init`, or `init --session-file <existing-CBS-config>` when upgrading. The manager adopts only the profile path and endpoint; it does not migrate cookies or delete the existing session config. Default mode has one instance, with conversation exclusion even before clones are enabled.

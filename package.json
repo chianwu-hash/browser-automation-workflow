@@ -16,6 +16,7 @@
     "browser:manage": "node scripts/ai-work-browser.js",
     "browser:run": "node scripts/ai-work-browser.js run",
     "test:browser-manager": "node --test scripts/tests/ai-work-browser.test.js",
+    "test:browser-background": "node --test scripts/tests/background-policy.test.js",
     "guided:start": "cbs-guided-start",
     "chatgpt:image-batch": "node scripts/chatgpt-image-batch.js",
     "chatgpt:image-mode-smoke": "node scripts/chatgpt-image-mode-smoke.js",

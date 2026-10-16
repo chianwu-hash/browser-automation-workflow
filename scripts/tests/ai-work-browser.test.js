@@ -22,6 +22,9 @@ function mockBrowser(profile, targetId = 'owned', calls = []) {
       calls.push(name);
       if (name === 'Browser.getBrowserCommandLine') return { arguments: [`--user-data-dir=${profile}`] };
       if (name === 'Target.createTarget') return { targetId };
+      if (name === 'Target.getTargets') return { targetInfos: [{ type: 'page', targetId }] };
+      if (name === 'Browser.getWindowForTarget') return { windowId: 1 };
+      if (name === 'Target.activateTarget') return {};
       if (name === 'Target.getTargetInfo') return { targetInfo: { targetId: args.targetId } };
       throw new Error(name);
     } }),
@@ -149,7 +152,7 @@ test('runtime verifies profile before creating a page and always disconnects', a
   const tools = { isPortFree: async () => false };
   const browser = mockBrowser(instance.profile, 'target-owned', calls);
   assert.equal(await openInstance(instance, { url: 'https://example.invalid', tools, transport: { connectOverCDP: async () => browser } }), 'target-owned');
-  assert.deepEqual(calls, ['Browser.getBrowserCommandLine', 'Target.createTarget', 'disconnect']);
+  assert.deepEqual(calls, ['Browser.getBrowserCommandLine', 'Target.getTargets', 'Browser.getWindowForTarget', 'Target.createTarget', 'disconnect']);
   const badCalls = [];
   await assert.rejects(openInstance(instance, { tools, transport: { connectOverCDP: async () => mockBrowser(path.resolve('wrong-profile'), 'x', badCalls) } }), /不符/);
   assert.deepEqual(badCalls, ['Browser.getBrowserCommandLine', 'disconnect']);
@@ -160,7 +163,7 @@ test('runtime launches registered profile with extensions and no download interc
   let launched;
   const tools = { isPortFree: async () => true, buildBrowserArgs: (o) => [`--user-data-dir=${o.profilePath}`],
     launchBrowserProcess: (o) => { launched = o; }, waitForCdpEndpoint: async () => {} };
-  await openInstance({ port: 9232, profile }, { tools, transport: { connectOverCDP: async () => mockBrowser(profile) } });
+  await openInstance({ port: 9232, profile }, { foreground: true, tools, transport: { connectOverCDP: async () => mockBrowser(profile) } });
   assert.equal(launched.profilePath, profile);
   assert.equal(launched.allowExtensions, true);
   assert.ok(launched.args.includes('--enable-automation'));

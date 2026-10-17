@@ -49,33 +49,45 @@ test('authorization is strict boolean and scoped to this session', async () => {
   }
 });
 
-test('cold launch without a display request starts minimized, never with the visible launcher', async () => {
-  let visible = 0, minimized = 0, connections = 0;
+test('cold launch without a display request starts inactive and behind, never with the visible launcher', async () => {
+  let visible = 0, inactive = 0, connections = 0;
   await assert.rejects(openInstance({ port: 9233, profile: path.join(os.tmpdir(), 'ai-work-browser-test-profile') }, {
     tools: {
       isPortFree: async () => true,
       buildBrowserArgs: () => [],
       findBrowserExecutable: () => 'chrome.exe',
       launchBrowserProcess: () => visible++,
-      launchMinimizedProcess: () => { minimized++; throw new Error('stop after launch'); },
+      launchInactiveProcess: () => { inactive++; throw new Error('stop after launch'); },
     },
     transport: { connectOverCDP: async () => connections++ },
   }), /stop after launch/);
-  assert.equal(visible, 0); assert.equal(minimized, 1); assert.equal(connections, 0);
+  assert.equal(visible, 0); assert.equal(inactive, 1); assert.equal(connections, 0);
 });
 
-test('cold launch keeps requiring foreground where minimized launch is unavailable', async () => {
+test('cold launch keeps requiring foreground where inactive launch is unavailable', async () => {
   let connections = 0;
   await assert.rejects(openInstance({ port: 9233, profile: path.join(os.tmpdir(), 'ai-work-browser-test-profile') }, {
     tools: {
       isPortFree: async () => true,
       buildBrowserArgs: () => [],
       findBrowserExecutable: () => 'chrome.exe',
-      launchMinimizedProcess: () => null,
+      launchInactiveProcess: () => null,
     },
     transport: { connectOverCDP: async () => connections++ },
   }), { code: 'AI_BROWSER_FOREGROUND_REQUIRED' });
   assert.equal(connections, 0);
+});
+
+test('reuse restores minimized windows behind unless foreground was requested', async () => {
+  for (const foreground of [false, true]) {
+    const restored = [];
+    await assert.rejects(openInstance({ port: 9233 }, {
+      foreground,
+      tools: { isPortFree: async () => false, restoreMinimizedWindows: (port) => restored.push(port) },
+      transport: { connectOverCDP: async () => { throw new Error('stop after restore'); } },
+    }), /stop after restore/);
+    assert.deepEqual(restored, foreground ? [] : [9233]);
+  }
 });
 
 test('Playwright protects existing and new pages and sessions', async () => {

@@ -2,6 +2,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { EventEmitter } = require('node:events');
+const os = require('node:os');
+const path = require('node:path');
 const { guardSession, guardPlaywright, guardPuppeteer } = require('../../lib/ai-work-browser/background-policy');
 const { openInstance } = require('../../lib/ai-work-browser/runtime');
 
@@ -47,13 +49,33 @@ test('authorization is strict boolean and scoped to this session', async () => {
   }
 });
 
-test('cold launch is blocked before spawning or connecting', async () => {
-  let launches = 0, connections = 0;
-  await assert.rejects(openInstance({ port: 9233 }, {
-    tools: { isPortFree: async () => true, launchBrowserProcess: () => launches++ },
+test('cold launch without a display request starts minimized, never with the visible launcher', async () => {
+  let visible = 0, minimized = 0, connections = 0;
+  await assert.rejects(openInstance({ port: 9233, profile: path.join(os.tmpdir(), 'ai-work-browser-test-profile') }, {
+    tools: {
+      isPortFree: async () => true,
+      buildBrowserArgs: () => [],
+      findBrowserExecutable: () => 'chrome.exe',
+      launchBrowserProcess: () => visible++,
+      launchMinimizedProcess: () => { minimized++; throw new Error('stop after launch'); },
+    },
+    transport: { connectOverCDP: async () => connections++ },
+  }), /stop after launch/);
+  assert.equal(visible, 0); assert.equal(minimized, 1); assert.equal(connections, 0);
+});
+
+test('cold launch keeps requiring foreground where minimized launch is unavailable', async () => {
+  let connections = 0;
+  await assert.rejects(openInstance({ port: 9233, profile: path.join(os.tmpdir(), 'ai-work-browser-test-profile') }, {
+    tools: {
+      isPortFree: async () => true,
+      buildBrowserArgs: () => [],
+      findBrowserExecutable: () => 'chrome.exe',
+      launchMinimizedProcess: () => null,
+    },
     transport: { connectOverCDP: async () => connections++ },
   }), { code: 'AI_BROWSER_FOREGROUND_REQUIRED' });
-  assert.equal(launches, 0); assert.equal(connections, 0);
+  assert.equal(connections, 0);
 });
 
 test('Playwright protects existing and new pages and sessions', async () => {

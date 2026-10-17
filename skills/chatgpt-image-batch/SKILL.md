@@ -29,7 +29,7 @@ Run one image per prompt file:
 npm run chatgpt:image-batch -- --cdp-url http://127.0.0.1:9232 --prompt-dir <dir> --output-dir <out>
 ```
 
-Run same-brief variants from one prompt file:
+Run same-brief variants as sequential prompts (`--count N` sends N prompts one after another in the same chat, one image per prompt):
 
 ```powershell
 npm run chatgpt:image-batch -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --count 4 --output-dir <out>
@@ -41,10 +41,10 @@ Run with one or more reference images:
 npm run chatgpt:image-batch -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --reference-image <style.png> --reference-image <character.png> --count 1 --output-dir <out>
 ```
 
-Probe a single response for multiple images:
+Generate several separate images from one prompt in a single response (Images 2.5):
 
 ```powershell
-npm run chatgpt:image-multi-mvp -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --expected-images 3 --output-dir <out>
+npm run chatgpt:image-multi-mvp -- --cdp-url http://127.0.0.1:9232 --prompt-file <file> --expected-images 3 --allow-partial --output-dir <out>
 ```
 
 ## Core Workflow
@@ -62,8 +62,8 @@ npm run chatgpt:image-multi-mvp -- --cdp-url http://127.0.0.1:9232 --prompt-file
 ### 2. Choose the mode
 
 - Use `chatgpt:image-batch` with `--prompt-dir` when prompt order matters, such as slide or card sequences.
-- Use `chatgpt:image-batch` with `--prompt-file --count <n>` for variants of one brief.
-- Use `chatgpt:image-multi-mvp` only to test whether the current ChatGPT UI can return several generated images from one assistant response.
+- Use `chatgpt:image-batch` with `--prompt-file --count <n>` for variants of one brief when each image should be its own request: it sends n prompts one after another in the same chat, the first image sets the shared style, and each later prompt asks for the next variant. This takes roughly 1-2 minutes per image.
+- Use `chatgpt:image-multi-mvp --expected-images <n> --allow-partial` when several separate images can come from one request. On the Images 2.5 UI one prompt can return several separate images in one assistant response; verified 2026-10-17 with 3 images in about 1.5 minutes from send to download. The prompt itself must say the exact number, ask for separate image files rather than a collage, grid, contact sheet or poster, and describe each image (for example "第 1 張…第 2 張…第 3 張…"). The page shows a large viewer plus a thumbnail strip; the tool collects every image from both. ChatGPT may still return fewer images or a single collage, so check `detectedNewImages` and look at the files; with `--allow-partial` it downloads whatever arrived instead of waiting for the timeout. Only 3 images per response have been verified.
 - The verified **製作圖像** action is the default for image runs. On the 2026-09-30 UI, open `新增檔案和更多內容`, choose `製作圖像`, and verify the selected chip has `aria-label="移除 製作圖像"`. Run the no-send `chatgpt:image-mode-smoke` after a UI change; if the action cannot be verified, stop before sending.
 - Use `--direct-prompt` only when intentionally probing prompt-driven image generation. Do not silently switch modes after an action-selection failure.
 
@@ -90,7 +90,8 @@ Every browser-writing step must prove its own success before the next long wait 
 - send: the composer no longer contains the prompt, a new user message exists, and that message matches the prompt prefix
 - conversation identity: while waiting and before downloading, the latest visible user message must match this request. ChatGPT may replace a provisional conversation URL with its permanent URL during the same request, so a URL change alone is not failure. If another job changes the latest user message, stop and mark the result failed; never attribute its image to this run
 - generation start: observe image-specific generating text in the assistant turn or the page-level image progress card (currently including `正在產生更細緻的圖片` / `圖像生成時玩貪食蛇`), or a new generated-image ID
-- generation completion: at least one new generated-image node or assistant PNG/JPEG/WebP file card appears after the round baseline and becomes stable
+- generation completion: at least one new generated-image node or assistant PNG/JPEG/WebP file card appears after the round baseline and becomes stable. Stability counts only after the stop control and progress signals have disappeared; the images must then stay unchanged for 10 seconds (`imageSettleMs`). In 2026-10-17 tests all images of a response were present when the stop control disappeared and none were swapped afterwards.
+- progress: the tools print timestamped `[progress HH:mm:ss.mmm]` lines on stderr (sent, generation started, image count, generation finished, ready, each download). The JSON result on stdout is unchanged. During long waits, relay the latest progress line to the user instead of guessing.
 - download: the file exists, is nonzero, has a supported image signature, and its written byte count matches. If the assistant also reports `圖像生成失敗`, stop the batch before the next prompt, mark the run failed, and preserve the artifact and partial result in failure metadata.
 
 Use a short send-acceptance timeout. If the prompt remains in the composer, fail immediately; never spend the full generation timeout waiting for a prompt that was not sent.
@@ -116,7 +117,7 @@ This skill is for:
 - optional image-action compatibility probing
 - local reference-image upload with pre-send attachment verification
 - prompt-file based image batches
-- single-response multi-image probing
+- single-response multi-image generation (large viewer plus thumbnail strip)
 - generated image DOM detection and estuary URL download, with assistant file-card download fallback
 - JSON metadata and output artifact validation
 
